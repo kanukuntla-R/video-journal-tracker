@@ -1,3 +1,6 @@
+# Virtual env
+.venv/
+
 # Env files
 .env
 backend/video_service/.env
