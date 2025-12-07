@@ -4,7 +4,7 @@ from dotenv import load_dotenv
 
 load_dotenv()
 
-openai.api_key = os.getenv("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")
+openai.api_key = os.getenv("OPENAI_API_KEY")
 
 def generate_summary(transcript: str) -> str:
     response = openai.ChatCompletion.create(
