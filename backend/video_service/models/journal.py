@@ -11,12 +11,28 @@ class PyObjectId(ObjectId):
     def __get_validators__(cls):
         yield cls.validate
 
+    # @classmethod
+    # def validate(cls, v):
+    #     if not ObjectId.is_valid(v):
+    #         raise ValueError("Invalid ObjectId")
+    #     return ObjectId(v)
+
     @classmethod
-    def validate(cls, v):
+    def validate(cls, v, info=None):
+        """
+        Pydantic v2 will pass (cls, v, info).
+        We accept 'info' but we don't need to use it.
+        """
+        # If it's already an ObjectId (like from Mongo), just return it
+        if isinstance(v, ObjectId):
+            return v
+
+        # If it's a string, make sure it's a valid ObjectId string
         if not ObjectId.is_valid(v):
             raise ValueError("Invalid ObjectId")
-        return ObjectId(v)
 
+        return ObjectId(v)
+    
     @classmethod
     def __get_pydantic_json_schema__(cls, core_schema, handler):
         # Fix for Pydantic v2 – returns ObjectId as a string in docs
