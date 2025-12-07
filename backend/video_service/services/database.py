@@ -21,10 +21,16 @@ async def save_journal_entry(entry: JournalEntry):
     return str(result.inserted_id)
 
 
-async def get_journals(user_id: Optional[str] = None, limit: int = 50) -> List[JournalEntry]:
-    query = {}
+async def get_journals(
+    user_id: Optional[str] = None,
+    date: Optional[str] = None,
+    limit: int = 50,
+) -> List[JournalEntry]:
+    query: dict = {}
     if user_id:
         query["user_id"] = user_id
+    if date:
+        query["date"] = date  # 'date' is stored as a string in your JournalEntry
 
     cursor = journal_collection.find(query).sort("created_at", -1).limit(limit)
 
@@ -35,7 +41,6 @@ async def get_journals(user_id: Optional[str] = None, limit: int = 50) -> List[J
         except ValidationError as e:
             bad_id = doc.get("_id")
             print(f"Skipping invalid journal {bad_id}: {e}")
-            # just skip this document
 
     return journals
 

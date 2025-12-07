@@ -25,8 +25,12 @@ async def upload_journal(entry: JournalEntry):
 
 
 @router.get("/journals", response_model=List[JournalEntry])
-async def list_journals(user_id: Optional[str] = None, limit: int = 50):
-    journals = await get_journals(user_id=user_id, limit=limit)
+async def list_journals(
+    user_id: Optional[str] = None,
+    date: Optional[str] = None,
+    limit: int = 50,
+):
+    journals = await get_journals(user_id=user_id, date=date, limit=limit)
     return journals
 
 @router.get("/journals/{journal_id}", response_model=JournalEntry)
