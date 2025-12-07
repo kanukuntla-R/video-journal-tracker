@@ -4,7 +4,8 @@
 # Env files
 .env
 backend/video_service/.env
-
+# storage files
+backend/video_service/storage/
 # Temp files
 backend/video_service/temp/
 
