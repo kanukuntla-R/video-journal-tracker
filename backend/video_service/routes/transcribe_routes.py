@@ -53,7 +53,7 @@ async def transcribe_audio_endpoint(
         journal = JournalEntry(
             user_id=user_id,
             date=date,
-            video_path=temp_path,
+            video_path=final_audio_path,
             transcript=transcript,
             summary=summary,
             duration=duration,
@@ -62,7 +62,7 @@ async def transcribe_audio_endpoint(
         journal_id = await save_journal_entry(journal)
 
 
-        os.remove(temp_path)
+        # os.remove(temp_path) // for temp testing to remove the temp file
 
         return {
             "transcript": transcript,
