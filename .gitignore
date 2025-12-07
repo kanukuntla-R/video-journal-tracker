@@ -1,4 +1,4 @@
 backend/video_service/temp/
+backend/video_service/.env 
 .DS_Store
 .DS_Store
-.env
