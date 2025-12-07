@@ -1,4 +1,9 @@
-backend/video_service/temp/
-.DS_Store
-.DS_Store
+# Env files
 .env
+backend/video_service/.env
+
+# Temp files
+backend/video_service/temp/
+
+# macOS junk
+.DS_Store
