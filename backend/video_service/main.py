@@ -5,5 +5,10 @@ from backend.video_service.routes import transcribe_routes
 
 
 app = FastAPI()
+
+@app.get("/health")
+async def health_check():
+    return {"status": "ok"}
+
 app.include_router(journal_routes.router)
 app.include_router(transcribe_routes.router)
