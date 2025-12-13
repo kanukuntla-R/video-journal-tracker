@@ -1,0 +1,178 @@
+:root{
+    --bg: #050506;
+    --card: #141417;
+    --card2: #17171c;
+    --text: #ffffff;
+    --muted: #a9a9b2;
+  
+    --orange: #ff7a1a;  /* streak */
+    --purple: #8b5cf6;  /* journal duration */
+    --blue: #3b82f6;    /* progress / create */
+  }
+  
+  *{ box-sizing: border-box; }
+  html, body { height: 100%; }
+  body{
+    margin: 0;
+    background: var(--bg);
+    color: var(--text);
+    font-family: -apple-system, BlinkMacSystemFont, "SF Pro Display", "SF Pro Text",
+                 "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+  }
+  
+  .page{
+    min-height: 100vh;
+    padding: 18px 16px 120px; /* bottom padding for tab bar */
+  }
+  
+  .sectionTitle{
+    font-weight: 700;
+    font-size: 16px;
+    margin: 18px 0 10px;
+  }
+  
+  .card{
+    width: 100%;
+    background: var(--card);
+    border-radius: 22px;
+    padding: 16px;
+    margin: 12px 0;
+  }
+  
+  .cardRow{
+    display: flex;
+    align-items: flex-start;
+    justify-content: space-between;
+    gap: 14px;
+  }
+  
+  .leftBlock{
+    display: flex;
+    gap: 12px;
+    align-items: flex-start;
+  }
+  
+  .iconWrap{
+    width: 34px;
+    height: 34px;
+    border-radius: 12px;
+    display: grid;
+    place-items: center;
+    flex: 0 0 auto;
+    background: var(--card2);
+  }
+  
+  .title{
+    font-size: 13px;
+    font-weight: 600;
+    color: var(--muted);
+    text-transform: uppercase;
+    letter-spacing: 0.06em;
+  }
+  
+  .value{
+    font-size: 34px;
+    font-weight: 800;
+    line-height: 1.0;
+    margin-top: 6px;
+  }
+  
+  .meta{
+    text-align: right;
+    color: var(--muted);
+    font-size: 12px;
+    white-space: nowrap;
+  }
+  
+  .chevron{
+    color: var(--muted);
+    font-size: 18px;
+    margin-left: 10px;
+  }
+  
+  .miniBars{
+    display: inline-flex;
+    gap: 3px;
+    align-items: flex-end;
+    margin-top: 8px;
+  }
+  .miniBars span{
+    width: 5px;
+    border-radius: 99px;
+    background: #2a2a33;
+  }
+  .miniBars span.active{ background: currentColor; }
+  
+  .tap{
+    cursor: pointer;
+    user-select: none;
+    transition: transform 140ms ease, opacity 140ms ease;
+  }
+  .tap:active{ transform: scale(0.985); opacity: 0.92; }
+  
+  /* Floating create button */
+  .fab{
+    position: fixed;
+    right: 18px;
+    bottom: 106px;
+    background: var(--blue);
+    color: white;
+    border: 0;
+    border-radius: 999px;
+    padding: 12px 14px;
+    font-weight: 700;
+    display: flex;
+    gap: 10px;
+    align-items: center;
+    box-shadow: 0 10px 30px rgba(0,0,0,0.35);
+    transition: transform 140ms ease, filter 140ms ease;
+  }
+  .fab:active{ transform: scale(0.98); filter: brightness(0.92); }
+  
+  /* Floating pill tab bar */
+  .tabBar{
+    position: fixed;
+    left: 16px;
+    right: 16px;
+    bottom: 18px;
+    height: 68px;
+    border-radius: 999px;
+    padding: 10px;
+    display: flex;
+    gap: 10px;
+    align-items: center;
+    justify-content: space-between;
+  
+    background: rgba(25,25,30,0.62);
+    backdrop-filter: blur(14px);
+    -webkit-backdrop-filter: blur(14px);
+  
+    box-shadow: 0 18px 55px rgba(0,0,0,0.55);
+  }
+  
+  .tab{
+    flex: 1;
+    height: 48px;
+    border-radius: 999px;
+    display: flex;
+    gap: 10px;
+    align-items: center;
+    justify-content: center;
+    color: var(--muted);
+    text-decoration: none;
+    font-weight: 700;
+    transition: transform 140ms ease, background 140ms ease, color 140ms ease;
+  }
+  .tab:active{ transform: scale(0.985); }
+  
+  .tab.active{
+    background: rgba(255,255,255,0.10);
+    color: var(--text);
+  }
+  
+  .tab svg{
+    width: 20px;
+    height: 20px;
+    display: block;
+  }
+  
