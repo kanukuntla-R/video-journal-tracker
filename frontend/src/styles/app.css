@@ -1,0 +1,479 @@
+:root{
+    --bg: #050506;
+    --card: #141417;
+    --card2: #17171c;
+    --text: #ffffff;
+    --muted: #a9a9b2;
+  
+    --orange: #ff7a1a;  /* streak */
+    --purple: #8b5cf6;  /* journal duration */
+    --blue: #3b82f6;    /* progress / create */
+  }
+  
+  /* Month grid slide animations */
+  .monthGrid{
+    transition: transform 180ms ease, opacity 180ms ease;
+  }
+  .monthGrid[data-slide="left"]{
+    animation: slideLeft 180ms ease;
+  }
+  .monthGrid[data-slide="right"]{
+    animation: slideRight 180ms ease;
+  }
+  @keyframes slideLeft{
+    from { transform: translateX(24px); opacity: 0; }
+    to   { transform: translateX(0); opacity: 1; }
+  }
+  @keyframes slideRight{
+    from { transform: translateX(-24px); opacity: 0; }
+    to   { transform: translateX(0); opacity: 1; }
+  }
+
+  *{ box-sizing: border-box; }
+  html, body { height: 100%; }
+  body{
+    margin: 0;
+    background: var(--bg);
+    color: var(--text);
+    font-family: -apple-system, BlinkMacSystemFont, "SF Pro Display", "SF Pro Text",
+                 "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+  }
+  
+  .page{
+    min-height: 100vh;
+    padding: 18px 16px 120px; /* bottom padding for tab bar */
+  }
+  
+  .sectionTitle{
+    font-weight: 700;
+    font-size: 16px;
+    margin: 18px 0 10px;
+  }
+  
+  .card{
+    width: 100%;
+    background: var(--card);
+    border-radius: 22px;
+    padding: 16px;
+    margin: 12px 0;
+  }
+  
+  .cardRow{
+    display: flex;
+    align-items: flex-start;
+    justify-content: space-between;
+    gap: 14px;
+  }
+  
+  .leftBlock{
+    display: flex;
+    gap: 12px;
+    align-items: flex-start;
+  }
+  
+  .iconWrap{
+    width: 34px;
+    height: 34px;
+    border-radius: 12px;
+    display: grid;
+    place-items: center;
+    flex: 0 0 auto;
+    background: var(--card2);
+  }
+  
+  .title{
+    font-size: 13px;
+    font-weight: 600;
+    color: var(--muted);
+    text-transform: uppercase;
+    letter-spacing: 0.06em;
+  }
+  
+  .value{
+    font-size: 34px;
+    font-weight: 800;
+    line-height: 1.0;
+    margin-top: 6px;
+  }
+  
+  .meta{
+    text-align: right;
+    color: var(--muted);
+    font-size: 12px;
+    white-space: nowrap;
+  }
+  
+  .chevron{
+    color: var(--muted);
+    font-size: 18px;
+    margin-left: 10px;
+  }
+  
+  .miniBars{
+    display: inline-flex;
+    gap: 3px;
+    align-items: flex-end;
+    margin-top: 8px;
+  }
+  .miniBars span{
+    width: 5px;
+    border-radius: 99px;
+    background: #2a2a33;
+  }
+  .miniBars span.active{ background: currentColor; }
+  
+  .tap{
+    cursor: pointer;
+    user-select: none;
+    transition: transform 140ms ease, opacity 140ms ease;
+  }
+  .tap:active{ transform: scale(0.985); opacity: 0.92; }
+  
+  /* Floating create button */
+  .fab{
+    position: fixed;
+    right: 18px;
+    bottom: 106px;
+    background: var(--blue);
+    color: white;
+    border: 0;
+    border-radius: 999px;
+    padding: 12px 14px;
+    font-weight: 700;
+    display: flex;
+    gap: 10px;
+    align-items: center;
+    box-shadow: 0 10px 30px rgba(0,0,0,0.35);
+    transition: transform 140ms ease, filter 140ms ease;
+  }
+  .fab:active{ transform: scale(0.98); filter: brightness(0.92); }
+  
+  /* Floating pill tab bar */
+  .tabBar{
+    position: fixed;
+    left: 16px;
+    right: 16px;
+    bottom: 18px;
+    height: 68px;
+    border-radius: 999px;
+    padding: 10px;
+    display: flex;
+    gap: 10px;
+    align-items: center;
+    justify-content: space-between;
+  
+    background: linear-gradient(145deg, rgba(18,18,22,0.85), rgba(28,28,34,0.7));
+    border: 1px solid rgba(255,255,255,0.05);
+    backdrop-filter: blur(14px);
+    -webkit-backdrop-filter: blur(14px);
+    box-shadow: 0 18px 55px rgba(0,0,0,0.55), 0 2px 10px rgba(0,0,0,0.35);
+  }
+  
+  .tab{
+    flex: 1;
+    height: 48px;
+    border-radius: 999px;
+    display: flex;
+    gap: 10px;
+    align-items: center;
+    justify-content: center;
+    color: var(--muted);
+    text-decoration: none;
+    font-weight: 700;
+    font-size: 13px;
+    letter-spacing: 0.01em;
+    transition:
+      transform 140ms ease,
+      background 160ms ease,
+      color 160ms ease,
+      box-shadow 160ms ease;
+    padding: 0 10px;
+  }
+  .tab:active{ transform: scale(0.985); }
+  
+  .tab.active{
+    background: linear-gradient(135deg, rgba(255,255,255,0.16), rgba(255,255,255,0.08));
+    color: var(--text);
+    box-shadow: 0 8px 18px rgba(0,0,0,0.35), 0 1px 0 rgba(255,255,255,0.10) inset;
+  }
+  
+  .tab svg{
+    width: 20px;
+    height: 20px;
+    display: block;
+    filter: drop-shadow(0 0 4px rgba(0,0,0,0.25));
+  }
+
+  /* ===== Calendar Page ===== */
+
+.calendarPage {
+    padding-top: 16px;
+  }
+  
+  .calendarTopRow {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 12px;
+  }
+  
+  .pillButton,
+  .pillIcon {
+    background: rgba(23, 23, 28, 0.72);
+    border: 1px solid rgba(255, 255, 255, 0.06);
+    color: var(--text);
+    border-radius: 999px;
+    padding: 10px 14px;
+    font-weight: 700;
+    cursor: pointer;
+    backdrop-filter: blur(12px);
+  }
+  
+  .pillButton:active,
+  .pillIcon:active {
+    transform: scale(0.98);
+    opacity: 0.92;
+  }
+  
+  .pillGroup {
+    display: inline-flex;
+    gap: 8px;
+    padding: 6px;
+    border-radius: 999px;
+    background: rgba(23, 23, 28, 0.62);
+    border: 1px solid rgba(255, 255, 255, 0.06);
+    backdrop-filter: blur(12px);
+  }
+  
+  .pillIcon {
+    padding: 10px 12px;
+    display: grid;
+    place-items: center;
+  }
+  
+  .calendarMonthTitle {
+    margin-top: 16px;
+    font-size: 34px;
+    font-weight: 900;
+    letter-spacing: -0.02em;
+  }
+  
+  .weekdayRow {
+    margin-top: 10px;
+    display: grid;
+    grid-template-columns: repeat(7, 1fr);
+    gap: 6px;
+    color: rgba(255, 255, 255, 0.6);
+    font-weight: 700;
+    font-size: 12px;
+  }
+  
+  .weekdayCell {
+    text-align: center;
+    padding: 6px 0;
+  }
+  
+  .monthGrid {
+    margin-top: 10px;
+    display: grid;
+    grid-template-columns: repeat(7, 1fr);
+    gap: 6px;
+  }
+  
+  .dayCell {
+    height: 54px;
+    border: none;
+    background: transparent;
+    color: var(--text);
+    border-radius: 16px;
+    display: grid;
+    grid-template-rows: 1fr 12px;
+    align-items: center;
+    justify-items: center;
+    cursor: pointer;
+  }
+  
+  .dayCell.otherMonth {
+    color: rgba(255, 255, 255, 0.25);
+  }
+  
+  .dayNumber {
+    width: 34px;
+    height: 34px;
+    display: grid;
+    place-items: center;
+    border-radius: 999px;
+    font-weight: 800;
+    font-size: 15px;
+  }
+  
+  .dayCell.selected .dayNumber {
+    background: #ff3b30; /* iOS-ish red */
+    color: white;
+  }
+  
+  .dayDotRow {
+    height: 12px;
+    display: grid;
+    place-items: center;
+  }
+  
+  .dayDot {
+    width: 6px;
+    height: 6px;
+    border-radius: 999px;
+    opacity: 0.9;
+  }
+  
+  /* ===== Journal Page ===== */
+
+.journalPage { padding-top: 16px; }
+
+.journalHeader{
+  display:flex;
+  align-items:center;
+  justify-content:space-between;
+  gap: 12px;
+}
+
+.journalHeaderRight{
+  text-align:right;
+  display:flex;
+  flex-direction:column;
+  gap: 4px;
+}
+
+.journalDate{
+  font-weight: 900;
+  font-size: 16px;
+}
+
+.journalMeta{
+  color: var(--muted);
+  font-size: 12px;
+}
+
+.journalEmpty{
+  min-height: 60vh;
+  display:grid;
+  place-items:center;
+  gap: 14px;
+}
+
+.createCircle{
+  width: 88px;
+  height: 88px;
+  border-radius: 999px;
+  border: none;
+  background: rgba(59,130,246,0.95); /* --blue vibe */
+  display:grid;
+  place-items:center;
+  cursor:pointer;
+  transition: transform 140ms ease, opacity 140ms ease;
+}
+.createCircle:active{ transform: scale(0.985); opacity: 0.92; }
+.createCircle:disabled{ opacity: 0.6; cursor: not-allowed; }
+
+.journalEmptyText{
+  color: var(--muted);
+  font-weight: 600;
+}
+
+.journalSectionLabel{
+  font-size: 13px;
+  font-weight: 700;
+  color: var(--muted);
+  text-transform: uppercase;
+  letter-spacing: 0.06em;
+  margin-bottom: 10px;
+}
+
+.journalSectionRow{
+  display:flex;
+  align-items:flex-start;
+  justify-content:space-between;
+  gap: 10px;
+  margin-bottom: 10px;
+}
+
+.mediaPlayer{
+  width: 100%;
+  max-width: 100%;
+  border-radius: 16px;
+  background: #0b0b0e;
+  object-fit: contain;
+  display: block;
+  margin: 0 auto;
+}
+
+/* Video player: constrain height and maintain aspect ratio */
+video.mediaPlayer {
+  aspect-ratio: 16 / 9;
+  max-height: 400px;
+}
+
+/* Audio player: keep controls compact */
+audio.mediaPlayer {
+  max-height: 48px;
+}
+
+.textBlock{
+  color: rgba(255,255,255,0.92);
+  font-size: 14px;
+  line-height: 1.6;
+  white-space: pre-wrap;
+}
+
+.kwRow{
+  display:flex;
+  flex-wrap:wrap;
+  gap: 6px;
+  justify-content:flex-end;
+}
+
+.chip{
+  font-size: 12px;
+  padding: 6px 10px;
+  border-radius: 999px;
+  background: rgba(255,255,255,0.06);
+  border: 1px solid rgba(255,255,255,0.06);
+  color: white;
+}
+
+.chipOrange{
+  background: rgba(255, 122, 26, 0.14);
+  border-color: rgba(255, 122, 26, 0.22);
+  color: var(--orange);
+}
+
+.chipPurple{
+  background: rgba(139, 92, 246, 0.14);
+  border-color: rgba(139, 92, 246, 0.22);
+  color: var(--purple);
+}
+
+.mutedBlock{
+  color: var(--muted);
+  font-size: 13px;
+  line-height: 1.5;
+  background: var(--card2);
+  padding: 12px;
+  border-radius: 16px;
+}
+
+.mono{
+  font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, "Liberation Mono", monospace;
+  font-size: 12px;
+  color: rgba(255,255,255,0.9);
+}
+
+.smallAction{
+  margin-top: 12px;
+  width: 100%;
+  border-radius: 16px;
+  border: 1px solid rgba(255,255,255,0.08);
+  background: rgba(23, 23, 28, 0.7);
+  color: var(--text);
+  padding: 12px 14px;
+  font-weight: 700;
+}
