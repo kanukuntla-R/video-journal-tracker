@@ -58,8 +58,14 @@ async def serve_media(user_id: str, date: str, filename: str):
     ext = os.path.splitext(filename)[1].lower()
     if ext == ".mp3":
         media_type = "audio/mpeg"
-    elif ext in [".mp4", ".mov", ".avi", ".mkv", ".webm", ".m4v"]:
+    elif ext == ".mp4" or ext == ".m4v":
         media_type = "video/mp4"
+    elif ext == ".mov":
+        media_type = "video/quicktime"
+    elif ext == ".webm":
+        media_type = "video/webm"
+    elif ext in [".avi", ".mkv"]:
+        media_type = "video/mp4"  # Fallback to mp4 for browser compatibility
     else:
         media_type = "application/octet-stream"
     

@@ -33,21 +33,39 @@ async def transcribe_audio_endpoint(
         file_ext = os.path.splitext(file.filename)[1].lower() if file.filename else ""
         video_extensions = ['.mp4', '.mov', '.avi', '.mkv', '.webm', '.m4v']
 
+        transcript = None
+        summary = None
+        duration = None
+
         if file_ext in video_extensions:
-            # Use os.path.splitext to properly replace extension regardless of case
+            # For video files: keep original video, extract audio temporarily for transcription
             base_path = os.path.splitext(temp_path)[0]
-            mp3_path = base_path + ".mp3"
+            temp_mp3_path = base_path + "_temp_audio.mp3"
+            
             try:
-                extract_audio_from_video(temp_path, mp3_path)
-                # Verify the MP3 was created
-                if not os.path.exists(mp3_path):
+                # Extract audio temporarily for transcription
+                extract_audio_from_video(temp_path, temp_mp3_path)
+                if not os.path.exists(temp_mp3_path):
                     raise Exception(f"FFmpeg extraction failed: output file not created")
-                os.remove(temp_path)  # Clean up original video
-                final_audio_path = mp3_path
+                
+                # Transcribe using the temporary audio file
+                transcript = transcribe_audio(temp_mp3_path)
+                summary = generate_summary(transcript)
+                duration = get_audio_duration(temp_mp3_path)
+                
+                # Clean up temporary audio file
+                if os.path.exists(temp_mp3_path):
+                    os.remove(temp_mp3_path)
+                
+                # Keep the original video - this will be saved to storage
+                final_file_path = temp_path
+                
             except subprocess.CalledProcessError as e:
-                # Clean up temp file on error
+                # Clean up on error
                 if os.path.exists(temp_path):
                     os.remove(temp_path)
+                if os.path.exists(temp_mp3_path):
+                    os.remove(temp_mp3_path)
                 raise HTTPException(
                     status_code=500, 
                     detail=f"Failed to extract audio from video: {str(e)}"
@@ -56,37 +74,37 @@ async def transcribe_audio_endpoint(
                 # Clean up on any error
                 if os.path.exists(temp_path):
                     os.remove(temp_path)
-                if os.path.exists(mp3_path):
-                    os.remove(mp3_path)
+                if os.path.exists(temp_mp3_path):
+                    os.remove(temp_mp3_path)
                 raise HTTPException(
                     status_code=500,
                     detail=f"Video processing error: {str(e)}"
                 )
         else:
-            final_audio_path = temp_path
+            # For audio files: transcribe directly
+            final_file_path = temp_path
+            transcript = transcribe_audio(final_file_path)
+            summary = generate_summary(transcript)
+            duration = get_audio_duration(final_file_path)
 
-        # 3) Move final audio into permanent storage: storage/{user_id}/{date}/journal_<uuid>.mp3
+        # 3) Move file into permanent storage: storage/{user_id}/{date}/journal_<uuid>.<original_ext>
         user_folder = os.path.join(AUDIO_STORAGE_ROOT, user_id)
         date_folder = os.path.join(user_folder, date)
         os.makedirs(date_folder, exist_ok=True)
 
-        stored_filename = f"journal_{uuid.uuid4().hex}.mp3"
-        stored_audio_path = os.path.join(date_folder, stored_filename)
+        # Preserve original file extension
+        original_ext = os.path.splitext(file.filename)[1] if file.filename else ".mp3"
+        stored_filename = f"journal_{uuid.uuid4().hex}{original_ext}"
+        stored_file_path = os.path.join(date_folder, stored_filename)
 
-        # Move from temp (or mp3_path) into storage
-        shutil.move(final_audio_path, stored_audio_path)
-        final_audio_path = stored_audio_path
+        # Move file to storage
+        shutil.move(final_file_path, stored_file_path)
 
-        # 4) Call Whisper + summary + duration on the stored file
-        transcript = transcribe_audio(final_audio_path)
-        summary = generate_summary(transcript)
-        duration = get_audio_duration(final_audio_path)
-
-        # 5) Save journal entry in Mongo with the permanent audio path
+        # 4) Save journal entry in Mongo with the permanent file path (video or audio)
         journal = JournalEntry(
             user_id=user_id,
             date=date,
-            video_path=final_audio_path,
+            video_path=stored_file_path,  # This will be the video file path for videos
             transcript=transcript,
             summary=summary,
             duration=duration,

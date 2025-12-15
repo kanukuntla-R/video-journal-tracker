@@ -73,7 +73,16 @@ export default function Journal() {
 
   // Determine media URL and type
   const mediaUrl = previewUrl || (journal ? getMediaUrl(journal) : null);
-  const mediaType = previewType || (journal?.video_path?.toLowerCase().endsWith('.mp3') ? 'audio' : 'video');
+  
+  // Determine media type: check for video extensions, otherwise assume audio
+  const getMediaType = (path) => {
+    if (!path) return 'video';
+    const lowerPath = path.toLowerCase();
+    const videoExtensions = ['.mp4', '.mov', '.avi', '.mkv', '.webm', '.m4v'];
+    return videoExtensions.some(ext => lowerPath.endsWith(ext)) ? 'video' : 'audio';
+  };
+  
+  const mediaType = previewType || (journal ? getMediaType(journal.video_path) : 'video');
 
   // Cleanup preview URL on unmount or when replaced
   useEffect(() => {
