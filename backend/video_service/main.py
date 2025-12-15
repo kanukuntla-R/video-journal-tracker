@@ -7,9 +7,14 @@ from fastapi.middleware.cors import CORSMiddleware
 
 app = FastAPI()
 
+# Development CORS allowlist. Add your LAN IP so mobile devices can reach it.
 origins = [
     "http://localhost:3000",
-    "http://localhost:8000",
+    "http://localhost:5173",
+    "http://127.0.0.1:5173",
+    "http://127.0.0.1:8000",
+    # Replace with your LAN IP (use `ifconfig`/`ipconfig`) so phone/tablet can call the API
+    "http://10.155.225.19:5173",
 ]
 
 app.add_middleware(
