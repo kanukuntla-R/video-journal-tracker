@@ -29,7 +29,12 @@ export default function Dashboard() {
     <div className="page">
       <div className="sectionTitle">Calendar</div>
 
-      <div className="card">
+      <div
+        className="card tap"
+        onClick={() => nav("/calendar")}
+        role="button"
+        tabIndex={0}
+      >
         <div className="cardRow">
           <div>
             <div className="title">This month</div>

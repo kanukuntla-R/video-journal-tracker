@@ -175,4 +175,125 @@
     height: 20px;
     display: block;
   }
+
+  /* ===== Calendar Page ===== */
+
+.calendarPage {
+    padding-top: 16px;
+  }
+  
+  .calendarTopRow {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 12px;
+  }
+  
+  .pillButton,
+  .pillIcon {
+    background: rgba(23, 23, 28, 0.72);
+    border: 1px solid rgba(255, 255, 255, 0.06);
+    color: var(--text);
+    border-radius: 999px;
+    padding: 10px 14px;
+    font-weight: 700;
+    cursor: pointer;
+    backdrop-filter: blur(12px);
+  }
+  
+  .pillButton:active,
+  .pillIcon:active {
+    transform: scale(0.98);
+    opacity: 0.92;
+  }
+  
+  .pillGroup {
+    display: inline-flex;
+    gap: 8px;
+    padding: 6px;
+    border-radius: 999px;
+    background: rgba(23, 23, 28, 0.62);
+    border: 1px solid rgba(255, 255, 255, 0.06);
+    backdrop-filter: blur(12px);
+  }
+  
+  .pillIcon {
+    padding: 10px 12px;
+    display: grid;
+    place-items: center;
+  }
+  
+  .calendarMonthTitle {
+    margin-top: 16px;
+    font-size: 34px;
+    font-weight: 900;
+    letter-spacing: -0.02em;
+  }
+  
+  .weekdayRow {
+    margin-top: 10px;
+    display: grid;
+    grid-template-columns: repeat(7, 1fr);
+    gap: 6px;
+    color: rgba(255, 255, 255, 0.6);
+    font-weight: 700;
+    font-size: 12px;
+  }
+  
+  .weekdayCell {
+    text-align: center;
+    padding: 6px 0;
+  }
+  
+  .monthGrid {
+    margin-top: 10px;
+    display: grid;
+    grid-template-columns: repeat(7, 1fr);
+    gap: 6px;
+  }
+  
+  .dayCell {
+    height: 54px;
+    border: none;
+    background: transparent;
+    color: var(--text);
+    border-radius: 16px;
+    display: grid;
+    grid-template-rows: 1fr 12px;
+    align-items: center;
+    justify-items: center;
+    cursor: pointer;
+  }
+  
+  .dayCell.otherMonth {
+    color: rgba(255, 255, 255, 0.25);
+  }
+  
+  .dayNumber {
+    width: 34px;
+    height: 34px;
+    display: grid;
+    place-items: center;
+    border-radius: 999px;
+    font-weight: 800;
+    font-size: 15px;
+  }
+  
+  .dayCell.selected .dayNumber {
+    background: #ff3b30; /* iOS-ish red */
+    color: white;
+  }
+  
+  .dayDotRow {
+    height: 12px;
+    display: grid;
+    place-items: center;
+  }
+  
+  .dayDot {
+    width: 6px;
+    height: 6px;
+    border-radius: 999px;
+    opacity: 0.9;
+  }
   
