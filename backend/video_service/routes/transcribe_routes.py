@@ -8,6 +8,7 @@ from datetime import datetime
 import os
 import shutil
 import uuid
+import subprocess
 
 AUDIO_STORAGE_ROOT = "backend/video_service/storage"
 router = APIRouter()
@@ -28,12 +29,39 @@ async def transcribe_audio_endpoint(
         with open(temp_path, "wb") as buffer:
             shutil.copyfileobj(file.file, buffer)
 
-        # 2) If it's .mp4, extract audio to .mp3; otherwise just use the audio file
-        if file.filename.endswith(".mp4"):
-            mp3_path = temp_path.replace(".mp4", ".mp3")
-            extract_audio_from_video(temp_path, mp3_path)
-            os.remove(temp_path)  # we don't need the original video anymore
-            final_audio_path = mp3_path
+        # 2) Check for video files (case-insensitive, common formats)
+        file_ext = os.path.splitext(file.filename)[1].lower() if file.filename else ""
+        video_extensions = ['.mp4', '.mov', '.avi', '.mkv', '.webm', '.m4v']
+
+        if file_ext in video_extensions:
+            # Use os.path.splitext to properly replace extension regardless of case
+            base_path = os.path.splitext(temp_path)[0]
+            mp3_path = base_path + ".mp3"
+            try:
+                extract_audio_from_video(temp_path, mp3_path)
+                # Verify the MP3 was created
+                if not os.path.exists(mp3_path):
+                    raise Exception(f"FFmpeg extraction failed: output file not created")
+                os.remove(temp_path)  # Clean up original video
+                final_audio_path = mp3_path
+            except subprocess.CalledProcessError as e:
+                # Clean up temp file on error
+                if os.path.exists(temp_path):
+                    os.remove(temp_path)
+                raise HTTPException(
+                    status_code=500, 
+                    detail=f"Failed to extract audio from video: {str(e)}"
+                )
+            except Exception as e:
+                # Clean up on any error
+                if os.path.exists(temp_path):
+                    os.remove(temp_path)
+                if os.path.exists(mp3_path):
+                    os.remove(mp3_path)
+                raise HTTPException(
+                    status_code=500,
+                    detail=f"Video processing error: {str(e)}"
+                )
         else:
             final_audio_path = temp_path
 
