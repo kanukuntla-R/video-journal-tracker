@@ -10,6 +10,25 @@
     --blue: #3b82f6;    /* progress / create */
   }
   
+  /* Month grid slide animations */
+  .monthGrid{
+    transition: transform 180ms ease, opacity 180ms ease;
+  }
+  .monthGrid[data-slide="left"]{
+    animation: slideLeft 180ms ease;
+  }
+  .monthGrid[data-slide="right"]{
+    animation: slideRight 180ms ease;
+  }
+  @keyframes slideLeft{
+    from { transform: translateX(24px); opacity: 0; }
+    to   { transform: translateX(0); opacity: 1; }
+  }
+  @keyframes slideRight{
+    from { transform: translateX(-24px); opacity: 0; }
+    to   { transform: translateX(0); opacity: 1; }
+  }
+
   *{ box-sizing: border-box; }
   html, body { height: 100%; }
   body{
@@ -143,11 +162,11 @@
     align-items: center;
     justify-content: space-between;
   
-    background: rgba(25,25,30,0.62);
+    background: linear-gradient(145deg, rgba(18,18,22,0.85), rgba(28,28,34,0.7));
+    border: 1px solid rgba(255,255,255,0.05);
     backdrop-filter: blur(14px);
     -webkit-backdrop-filter: blur(14px);
-  
-    box-shadow: 0 18px 55px rgba(0,0,0,0.55);
+    box-shadow: 0 18px 55px rgba(0,0,0,0.55), 0 2px 10px rgba(0,0,0,0.35);
   }
   
   .tab{
@@ -161,19 +180,28 @@
     color: var(--muted);
     text-decoration: none;
     font-weight: 700;
-    transition: transform 140ms ease, background 140ms ease, color 140ms ease;
+    font-size: 13px;
+    letter-spacing: 0.01em;
+    transition:
+      transform 140ms ease,
+      background 160ms ease,
+      color 160ms ease,
+      box-shadow 160ms ease;
+    padding: 0 10px;
   }
   .tab:active{ transform: scale(0.985); }
   
   .tab.active{
-    background: rgba(255,255,255,0.10);
+    background: linear-gradient(135deg, rgba(255,255,255,0.16), rgba(255,255,255,0.08));
     color: var(--text);
+    box-shadow: 0 8px 18px rgba(0,0,0,0.35), 0 1px 0 rgba(255,255,255,0.10) inset;
   }
   
   .tab svg{
     width: 20px;
     height: 20px;
     display: block;
+    filter: drop-shadow(0 0 4px rgba(0,0,0,0.25));
   }
 
   /* ===== Calendar Page ===== */

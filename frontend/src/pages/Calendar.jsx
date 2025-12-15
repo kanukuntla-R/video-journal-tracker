@@ -27,6 +27,9 @@ export default function Calendar() {
   // “Selected day” (red circle)
   const [selectedDay, setSelectedDay] = useState(dayjs());
 
+  // Slide direction for small transition on month change
+  const [slideDir, setSlideDir] = useState(null); // "left" | "right" | null
+
   // Mock “journal exists” dates for now (same idea you used on Dashboard)
   // Later we’ll fetch these from backend.
   const markedDates = useMemo(() => {
@@ -45,11 +48,18 @@ export default function Calendar() {
     return Array.from({ length: 42 }, (_, i) => start.add(i, "day"));
   }, [viewMonth]);
 
+  function changeMonth(delta) {
+    setSlideDir(delta > 0 ? "left" : "right");
+    setViewMonth((m) => m.add(delta, "month"));
+    // Clear the flag after the animation finishes
+    setTimeout(() => setSlideDir(null), 220);
+  }
+
   function goPrevMonth() {
-    setViewMonth((m) => m.subtract(1, "month"));
+    changeMonth(-1);
   }
   function goNextMonth() {
-    setViewMonth((m) => m.add(1, "month"));
+    changeMonth(1);
   }
 
   // Swipe detection (simple + beginner-friendly)
@@ -63,8 +73,8 @@ export default function Calendar() {
     startXRef.current = null;
 
     // threshold
-    if (dx > 60) goPrevMonth();
-    if (dx < -60) goNextMonth();
+    if (dx > 60) changeMonth(-1);
+    if (dx < -60) changeMonth(1);
   }
 
   function openJournal(d) {
@@ -114,7 +124,12 @@ export default function Calendar() {
       </div>
 
       {/* Month grid */}
-      <div className="monthGrid" aria-label="Calendar month grid">
+      <div
+        className="monthGrid"
+        aria-label="Calendar month grid"
+        key={viewMonth.format("YYYY-MM")}
+        data-slide={slideDir || ""}
+      >
         {cells.map((d) => {
           const iso = d.format("YYYY-MM-DD");
           const inMonth = d.month() === viewMonth.month();
