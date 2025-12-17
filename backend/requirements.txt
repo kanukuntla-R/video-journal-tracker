@@ -1,4 +1,8 @@
-   python-dotenv
-   openai
-   requests
-   mutagen
+python-dotenv
+openai
+requests
+mutagen
+fastapi
+uvicorn[standard]
+motor
+pydantic
