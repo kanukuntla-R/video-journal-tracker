@@ -1,6 +1,6 @@
 // FILE: frontend/src/pages/Journal.jsx
 import React, { useEffect, useMemo, useRef, useState } from "react";
-import { useNavigate, useParams } from "react-router-dom";
+import { useNavigate, useParams, useSearchParams } from "react-router-dom";
 import dayjs from "dayjs";
 
 import TabBar from "../components/TabBar.jsx";
@@ -35,6 +35,8 @@ function extractKeywords(text, max = 6) {
 export default function Journal() {
   const nav = useNavigate();
   const { date } = useParams(); // /journal/:date
+  const [searchParams] = useSearchParams();
+  const journalId = searchParams.get("id");
 
   const [loading, setLoading] = useState(true);
   const [journal, setJournal] = useState(null);
@@ -101,14 +103,20 @@ export default function Journal() {
       setJournal(null);
 
       try {
-        const list = await getJournalsByDate(date);
-        if (!alive) return;
-
-        if (Array.isArray(list) && list.length > 0) {
-          // pick latest
-          setJournal(list[0]);
+        if (journalId) {
+          const item = await getJournalById(journalId);
+          if (!alive) return;
+          setJournal(item || null);
         } else {
-          setJournal(null);
+          const list = await getJournalsByDate(date);
+          if (!alive) return;
+
+          if (Array.isArray(list) && list.length > 0) {
+            // pick latest
+            setJournal(list[0]);
+          } else {
+            setJournal(null);
+          }
         }
       } catch (e) {
         if (!alive) return;
@@ -122,7 +130,7 @@ export default function Journal() {
     return () => {
       alive = false;
     };
-  }, [date]);
+  }, [date, journalId]);
 
   function openFilePicker() {
     fileInputRef.current?.click();

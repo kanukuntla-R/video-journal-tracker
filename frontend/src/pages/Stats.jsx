@@ -596,7 +596,7 @@ export default function Stats() {
                         </div>
                         <div style={{ textAlign: "right", minWidth: 120 }}>
                           <div style={{ fontWeight: 700 }}>{formatSecondsToMin(j.duration)}</div>
-                          <div style={{ opacity: 0.7, fontSize: 12 }}>
+                          <div style={{ opacity: 0.7, fontSize: 12, color: ACCENT.streak }}>
                             {j.created_at ? dayjs(j.created_at).format("h:mm A") : streakDate}
                           </div>
                         </div>
@@ -605,7 +605,12 @@ export default function Stats() {
                       <div className="tagRow" style={{ marginTop: 8 }}>
                         <button
                           className="pillButton"
-                          style={{ padding: "6px 10px" }}
+                          style={{
+                            padding: "6px 10px",
+                            background: ACCENT.streak,
+                            color: "white",
+                            border: "none",
+                          }}
                           onClick={() => nav(`/journal/${streakDate}`)}
                         >
                           Open journal
@@ -715,7 +720,7 @@ export default function Stats() {
                         </div>
                         <div style={{ textAlign: "right", minWidth: 120 }}>
                           <div style={{ fontWeight: 700 }}>{formatSecondsToMin(j.duration)}</div>
-                          <div style={{ opacity: 0.7, fontSize: 12 }}>
+                          <div style={{ opacity: 0.7, fontSize: 12, color: ACCENT.duration }}>
                             {j.created_at ? dayjs(j.created_at).format("h:mm A") : dailyDate}
                           </div>
                         </div>
@@ -724,7 +729,12 @@ export default function Stats() {
                       <div className="tagRow" style={{ marginTop: 8 }}>
                         <button
                           className="pillButton"
-                          style={{ padding: "6px 10px" }}
+                          style={{
+                            padding: "6px 10px",
+                            background: ACCENT.duration,
+                            color: "white",
+                            border: "none",
+                          }}
                           onClick={() => nav(`/journal/${dailyDate}`)}
                         >
                           Open journal
@@ -825,7 +835,7 @@ export default function Stats() {
                         </div>
                         <div style={{ textAlign: "right", minWidth: 120 }}>
                           <div style={{ fontWeight: 700 }}>{formatSecondsToMin(j.duration)}</div>
-                          <div style={{ opacity: 0.7, fontSize: 12 }}>
+                          <div style={{ opacity: 0.7, fontSize: 12, color: ACCENT.duration }}>
                             {j.created_at ? dayjs(j.created_at).format("h:mm A") : weeklyDate}
                           </div>
                         </div>
@@ -834,7 +844,12 @@ export default function Stats() {
                       <div className="tagRow" style={{ marginTop: 8 }}>
                         <button
                           className="pillButton"
-                          style={{ padding: "6px 10px" }}
+                          style={{
+                            padding: "6px 10px",
+                            background: ACCENT.duration,
+                            color: "white",
+                            border: "none",
+                          }}
                           onClick={() => nav(`/journal/${weeklyDate}`)}
                         >
                           Open journal

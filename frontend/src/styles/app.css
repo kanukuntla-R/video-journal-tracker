@@ -198,6 +198,16 @@
     color: var(--text);
     box-shadow: 0 8px 18px rgba(0,0,0,0.35), 0 1px 0 rgba(255,255,255,0.10) inset;
   }
+
+/* Ensure tab icons inherit text color for visibility on dark bg */
+.tab svg,
+.tab svg path,
+.tab svg rect,
+.tab svg circle,
+.tab svg line {
+  fill: currentColor;
+  stroke: currentColor;
+}
   
   .tab svg{
     width: 20px;
