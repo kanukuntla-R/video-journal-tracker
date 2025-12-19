@@ -45,7 +45,7 @@ function trendLabel(nowValue, baselineValue) {
 }
 
 /** -------- Apple-Health style trend chart (thin bars + avg line) -------- */
-function TrendChart({ values = [], accent = "var(--orange)" }) {
+function TrendChart({ values = [], labels = [], accent = "var(--orange)", onBarClick }) {
   // fixed canvas size; svg scales to container
   const W = 320;
   const H = 92; // slightly shorter (more like Apple cards)
@@ -65,6 +65,7 @@ function TrendChart({ values = [], accent = "var(--orange)" }) {
   };
 
   const avgY = yFor(avg);
+  const [hoverIdx, setHoverIdx] = useState(null);
 
   return (
     <div
@@ -76,6 +77,7 @@ function TrendChart({ values = [], accent = "var(--orange)" }) {
         marginTop: 12,
         borderTop: "1px solid rgba(255,255,255,0.06)",
         paddingTop: 12,
+        position: "relative",
       }}
     >
       <svg
@@ -111,6 +113,8 @@ function TrendChart({ values = [], accent = "var(--orange)" }) {
           const x = pad + i * slotW + (slotW - barW) / 2;
           const y = yFor(v);
           const h = Math.max(1, H - pad - y);
+          const label = labels[i] || `Item ${i + 1}`;
+          const isHover = hoverIdx === i;
 
           return (
             <rect
@@ -120,8 +124,16 @@ function TrendChart({ values = [], accent = "var(--orange)" }) {
               width={barW}
               height={h}
               rx={barW / 2}
-              fill="rgba(255,255,255,0.28)"
-            />
+              fill={isHover ? accent : "rgba(255,255,255,0.28)"}
+              style={{ cursor: onBarClick ? "pointer" : "default", transition: "fill 120ms ease" }}
+              onMouseEnter={() => setHoverIdx(i)}
+              onMouseLeave={() => setHoverIdx(null)}
+              onClick={onBarClick ? () => onBarClick(label, v, i) : undefined}
+            >
+              <title>
+                {label} • {formatSecondsToMin(v)}
+              </title>
+            </rect>
           );
         })}
 
@@ -149,6 +161,25 @@ function TrendChart({ values = [], accent = "var(--orange)" }) {
           Average
         </text>
       </svg>
+
+      {hoverIdx !== null && values[hoverIdx] !== undefined && (
+        <div
+          style={{
+            position: "absolute",
+            top: 4,
+            right: 8,
+            fontSize: 10,
+            fontWeight: 700,
+            color: "white",
+            padding: "4px 8px",
+            background: "rgba(0,0,0,0.45)",
+            borderRadius: 10,
+            pointerEvents: "none",
+          }}
+        >
+          {labels[hoverIdx] || `Item ${hoverIdx + 1}`} • {formatSecondsToMin(values[hoverIdx])}
+        </div>
+      )}
     </div>
   );
 }
@@ -228,11 +259,17 @@ export default function Stats() {
       const day = dayjs().subtract(29 - i, "day").format("YYYY-MM-DD");
       return durationByDay.get(day) || 0;
     });
+    const last30Dates = Array.from({ length: 30 }, (_, i) =>
+      dayjs().subtract(29 - i, "day").format("YYYY-MM-DD")
+    );
 
     const last21 = Array.from({ length: 21 }, (_, i) => {
       const day = dayjs().subtract(20 - i, "day").format("YYYY-MM-DD");
       return durationByDay.get(day) || 0;
     });
+    const last21Dates = Array.from({ length: 21 }, (_, i) =>
+      dayjs().subtract(20 - i, "day").format("YYYY-MM-DD")
+    );
 
     // longest streak (all time)
     let longestStreak = 0;
@@ -259,6 +296,9 @@ export default function Stats() {
       const day = dayjs().subtract(6 - i, "day").format("YYYY-MM-DD");
       return durationByDay.get(day) || 0;
     });
+    const this7Dates = Array.from({ length: 7 }, (_, i) =>
+      dayjs().subtract(6 - i, "day").format("YYYY-MM-DD")
+    );
     const prev7 = Array.from({ length: 7 }, (_, i) => {
       const day = dayjs().subtract(13 - i, "day").format("YYYY-MM-DD");
       return durationByDay.get(day) || 0;
@@ -316,8 +356,11 @@ export default function Stats() {
       streak,
       longestStreak,
       last21,
+      last21Dates,
       last30,
+      last30Dates,
       this7,
+      this7Dates,
       todayDur,
       avgDaily30,
       medianDur,
@@ -407,12 +450,7 @@ export default function Stats() {
         <>
           <div className="sectionHeader">Trends</div>
 
-          <div
-            className="statsCard tap"
-            role="button"
-            tabIndex={0}
-            onClick={() => nav("/dashboard")}
-          >
+          <div className="statsCard">
             <div className="metricRow">
               <MetricIcon accent={ACCENT.streak}>🔥</MetricIcon>
               <div className="metricName" style={{ color: ACCENT.streak }}>
@@ -448,7 +486,7 @@ export default function Stats() {
               </div>
             </div>
 
-            <TrendChart values={derived.last21} accent={ACCENT.streak} />
+            <TrendChart values={derived.last21} labels={derived.last21Dates} accent={ACCENT.streak} />
 
             <div className="trendPill">
               <span>Trend</span>
@@ -493,7 +531,7 @@ export default function Stats() {
               </div>
             </div>
 
-            <TrendChart values={derived.last30} accent={ACCENT.duration} />
+            <TrendChart values={derived.last30} labels={derived.last30Dates} accent={ACCENT.duration} />
 
             <div className="trendPill">
               <span>Trend</span>
@@ -541,7 +579,7 @@ export default function Stats() {
               </div>
             </div>
 
-            <TrendChart values={derived.this7} accent={ACCENT.duration} />
+            <TrendChart values={derived.this7} labels={derived.this7Dates} accent={ACCENT.duration} />
 
             <div className="trendPill">
               <span>Trend</span>
