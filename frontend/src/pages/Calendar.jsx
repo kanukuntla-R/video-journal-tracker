@@ -1,10 +1,11 @@
 // FILE: frontend/src/pages/Calendar.jsx
-import React, { useMemo, useRef, useState } from "react";
+import React, { useMemo, useRef, useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import dayjs from "dayjs";
 
 import TabBar from "../components/TabBar.jsx";
 import { PlusIcon } from "../components/Icons.jsx";
+import { getAllJournals } from "../services/api.js";
 
 const WEEKDAYS = ["S", "M", "T", "W", "T", "F", "S"];
 
@@ -30,16 +31,26 @@ export default function Calendar() {
   // Slide direction for small transition on month change
   const [slideDir, setSlideDir] = useState(null); // "left" | "right" | null
 
-  // Mock “journal exists” dates for now (same idea you used on Dashboard)
-  // Later we’ll fetch these from backend.
-  const markedDates = useMemo(() => {
-    const now = dayjs();
-    return new Set([
-      now.format("YYYY-MM-01"),
-      now.format("YYYY-MM-03"),
-      now.format("YYYY-MM-06"),
-      now.format("YYYY-MM-10"),
-    ]);
+  // Fetch real journal dates instead of mock data
+  const [markedDates, setMarkedDates] = useState(new Set());
+  const [loadingJournals, setLoadingJournals] = useState(true);
+
+  useEffect(() => {
+    async function fetchJournalDates() {
+      try {
+        setLoadingJournals(true);
+        const journals = await getAllJournals("anonymous"); // Replace with actual user_id if you have auth
+        // Extract unique dates from journals
+        const dates = new Set(journals.map(j => j.date));
+        setMarkedDates(dates);
+      } catch (error) {
+        console.error("Failed to fetch journals:", error);
+        // Keep empty set on error
+      } finally {
+        setLoadingJournals(false);
+      }
+    }
+    fetchJournalDates();
   }, []);
 
   // Build 42 calendar cells: start from the Sunday before the 1st of the month.
