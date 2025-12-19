@@ -11,3 +11,9 @@ backend/video_service/temp/
 
 # macOS junk
 .DS_Store
+
+__pycache__/
+*.pyc
+
+__pycache__/
+*.pyc

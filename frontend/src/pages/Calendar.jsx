@@ -1,10 +1,11 @@
 // FILE: frontend/src/pages/Calendar.jsx
-import React, { useMemo, useRef, useState } from "react";
+import React, { useMemo, useRef, useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import dayjs from "dayjs";
 
 import TabBar from "../components/TabBar.jsx";
 import { PlusIcon } from "../components/Icons.jsx";
+import { getAllJournals, getJournalsByDate } from "../services/api.js";
 
 const WEEKDAYS = ["S", "M", "T", "W", "T", "F", "S"];
 
@@ -30,16 +31,29 @@ export default function Calendar() {
   // Slide direction for small transition on month change
   const [slideDir, setSlideDir] = useState(null); // "left" | "right" | null
 
-  // Mock “journal exists” dates for now (same idea you used on Dashboard)
-  // Later we’ll fetch these from backend.
-  const markedDates = useMemo(() => {
-    const now = dayjs();
-    return new Set([
-      now.format("YYYY-MM-01"),
-      now.format("YYYY-MM-03"),
-      now.format("YYYY-MM-06"),
-      now.format("YYYY-MM-10"),
-    ]);
+  // Fetch real journal dates instead of mock data
+  const [markedDates, setMarkedDates] = useState(new Set());
+  const [loadingJournals, setLoadingJournals] = useState(true);
+  const [dayJournals, setDayJournals] = useState([]);
+  const [dayLoading, setDayLoading] = useState(false);
+  const [dayErr, setDayErr] = useState("");
+
+  useEffect(() => {
+    async function fetchJournalDates() {
+      try {
+        setLoadingJournals(true);
+        const journals = await getAllJournals("anonymous"); // Replace with actual user_id if you have auth
+        // Extract unique dates from journals
+        const dates = new Set(journals.map(j => j.date));
+        setMarkedDates(dates);
+      } catch (error) {
+        console.error("Failed to fetch journals:", error);
+        // Keep empty set on error
+      } finally {
+        setLoadingJournals(false);
+      }
+    }
+    fetchJournalDates();
   }, []);
 
   // Build 42 calendar cells: start from the Sunday before the 1st of the month.
@@ -75,6 +89,21 @@ export default function Calendar() {
     // threshold
     if (dx > 60) changeMonth(-1);
     if (dx < -60) changeMonth(1);
+  }
+
+  async function loadDayJournals(d) {
+    const iso = d.format("YYYY-MM-DD");
+    setDayLoading(true);
+    setDayErr("");
+    try {
+      const list = await getJournalsByDate(iso);
+      setDayJournals(Array.isArray(list) ? list : []);
+    } catch (e) {
+      setDayErr(e?.message || "Failed to load journals for this date");
+      setDayJournals([]);
+    } finally {
+      setDayLoading(false);
+    }
   }
 
   function openJournal(d) {
@@ -148,7 +177,7 @@ export default function Calendar() {
               ].join(" ")}
               onClick={() => {
                 setSelectedDay(d);
-                openJournal(d); // tap opens that day’s journal (per spec)
+                loadDayJournals(d);
               }}
             >
               <div className="dayNumber">{d.date()}</div>
@@ -165,6 +194,62 @@ export default function Calendar() {
             </button>
           );
         })}
+      </div>
+
+      {/* Selected day journal list */}
+      <div className="statsCard" style={{ marginTop: 12 }}>
+        <div className="sectionHeader" style={{ marginTop: 0 }}>
+          Journals on {selectedDay.format("MMM D, YYYY")}
+        </div>
+
+        {dayLoading && <div className="insight">Loading journals…</div>}
+        {!!dayErr && <div className="insight" style={{ color: "var(--orange)" }}>{dayErr}</div>}
+
+        {!dayLoading && !dayErr && dayJournals.length === 0 && (
+          <div className="insight">No journals found for this date.</div>
+        )}
+
+        {!dayLoading && !dayErr && dayJournals.length > 0 && (
+          <div className="journalList" style={{ display: "grid", gap: 10 }}>
+            {dayJournals.map((j) => (
+              <div key={j._id || j.id || j.created_at} className="card" style={{ padding: 12 }}>
+                <div style={{ display: "flex", justifyContent: "space-between", gap: 12, flexWrap: "wrap" }}>
+                  <div>
+                    <div style={{ fontWeight: 800, marginBottom: 4 }}>
+                      {j.summary ? j.summary.slice(0, 120) : "Journal entry"}
+                      {j.summary && j.summary.length > 120 ? "…" : ""}
+                    </div>
+                    <div style={{ opacity: 0.8, fontSize: 13 }}>
+                      {j.transcript ? j.transcript.slice(0, 120) : "Transcript unavailable"}
+                      {j.transcript && j.transcript.length > 120 ? "…" : ""}
+                    </div>
+                  </div>
+                  <div style={{ textAlign: "right", minWidth: 120 }}>
+                    <div style={{ fontWeight: 700 }}>{Math.round((j.duration || 0) / 60)} min</div>
+                    <div style={{ opacity: 0.7, fontSize: 12, color: "var(--purple)" }}>
+                      {j.created_at ? dayjs(j.created_at).format("h:mm A") : selectedDay.format("MMM D")}
+                    </div>
+                  </div>
+                </div>
+
+                <div className="tagRow" style={{ marginTop: 8 }}>
+                  <button
+                    className="pillButton"
+                    style={{
+                      padding: "6px 10px",
+                      background: "var(--purple)",
+                      color: "white",
+                      border: "none",
+                    }}
+                    onClick={() => nav(`/journal/${selectedDay.format("YYYY-MM-DD")}?id=${j._id || j.id || ""}`)}
+                  >
+                    Open journal
+                  </button>
+                </div>
+              </div>
+            ))}
+          </div>
+        )}
       </div>
 
       <TabBar />

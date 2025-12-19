@@ -39,3 +39,10 @@ export async function transcribeMedia(file, { date, userId = "anonymous" } = {})
     body: fd,
   });
 }
+
+export async function getAllJournals(userId = null, limit = 1000) {
+  const params = new URLSearchParams();
+  if (userId) params.set("user_id", userId);
+  params.set("limit", limit.toString());
+  return request(`/journals?${params.toString()}`);
+}

@@ -1,4 +1,4 @@
-import React, { useMemo } from "react";
+import React, { useEffect, useMemo, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import dayjs from "dayjs";
 
@@ -6,9 +6,51 @@ import Card from "../components/Card.jsx";
 import TabBar from "../components/TabBar.jsx";
 import MiniCalendar from "../components/MiniCalendar.jsx";
 import { PlusIcon } from "../components/Icons.jsx";
+import { getAllJournals } from "../services/api.js";
 
 export default function Dashboard() {
   const nav = useNavigate();
+  const [journals, setJournals] = useState([]);
+
+  useEffect(() => {
+    let alive = true;
+    (async () => {
+      try {
+        const data = await getAllJournals();
+        if (alive && Array.isArray(data)) setJournals(data);
+      } catch {
+        if (alive) setJournals([]);
+      }
+    })();
+    return () => {
+      alive = false;
+    };
+  }, []);
+
+  const derived = useMemo(() => {
+    const durationByDay = new Map();
+    for (const j of journals) {
+      const d = j?.date;
+      if (!d) continue;
+      const prev = durationByDay.get(d) || 0;
+      durationByDay.set(d, prev + Number(j?.duration || 0));
+    }
+    let streak = 0;
+    for (let i = 0; i < 3650; i++) {
+      const day = dayjs().subtract(i, "day").format("YYYY-MM-DD");
+      const has = (durationByDay.get(day) || 0) > 0;
+      if (!has) break;
+      streak += 1;
+    }
+    const today = dayjs().format("YYYY-MM-DD");
+    const todayDur = durationByDay.get(today) || 0;
+    const last7 = Array.from({ length: 7 }, (_, i) => {
+      const day = dayjs().subtract(6 - i, "day").format("YYYY-MM-DD");
+      return durationByDay.get(day) || 0;
+    });
+    const avgLast7 = last7.length ? Math.round(last7.reduce((a, b) => a + b, 0) / last7.length) : 0;
+    return { streak, todayDur, avgLast7 };
+  }, [journals]);
 
   // Mock “journal exists” dates for now (replace with real API data later)
   const markedDates = useMemo(() => {
@@ -59,7 +101,7 @@ export default function Dashboard() {
 
       <Card
         title="Stats"
-        value="Streak 7"
+        value={`Streak ${derived.streak || 0}`}
         accent="var(--orange)"
         metaTop={now.format("MMM D")}
         metaBottom="Tap to open"
@@ -76,10 +118,10 @@ export default function Dashboard() {
 
       <Card
         title="Journal duration"
-        value="6:20"
+        value={derived.todayDur ? `${Math.round(derived.todayDur / 60)} min` : "—"}
         accent="var(--purple)"
-        metaTop="Avg"
-        metaBottom="This week"
+        metaTop="Today"
+        metaBottom={derived.avgLast7 ? `Avg ${Math.round(derived.avgLast7 / 60)} min (7d)` : "This week"}
         miniBars={[
           { height: 10, active: false },
           { height: 18, active: true },
@@ -87,7 +129,7 @@ export default function Dashboard() {
           { height: 16, active: false },
           { height: 9, active: false },
         ]}
-        onClick={() => nav(`/journal/${now.format("YYYY-MM-DD")}`)}
+        onClick={() => nav("/stats")}
         icon={<span style={{ fontWeight: 900 }}>⏱</span>}
       />
 
