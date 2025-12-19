@@ -87,7 +87,7 @@ export default function Dashboard() {
           { height: 16, active: false },
           { height: 9, active: false },
         ]}
-        onClick={() => nav(`/journal/${now.format("YYYY-MM-DD")}`)}
+        onClick={() => nav("/stats")}
         icon={<span style={{ fontWeight: 900 }}>⏱</span>}
       />
 

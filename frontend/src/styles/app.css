@@ -8,6 +8,8 @@
     --orange: #ff7a1a;  /* streak */
     --purple: #8b5cf6;  /* journal duration */
     --blue: #3b82f6;    /* progress / create */
+    --green: #10b981; /* goals & action */
+    --cyan:  #22d3ee; /* second brain / chat usage */
   }
   
   /* Month grid slide animations */
@@ -476,4 +478,124 @@ audio.mediaPlayer {
   color: var(--text);
   padding: 12px 14px;
   font-weight: 700;
+}
+
+/* ===== Stats Page ===== */
+
+.statsPage { padding-top: 16px; }
+
+.sectionHeader{
+  font-weight: 800;
+  font-size: 16px;
+  margin: 22px 0 10px;
+  color: var(--text);
+  text-transform: uppercase;
+  letter-spacing: 0.06em;
+}
+
+.statsCard{
+  background: var(--card);
+  border-radius: 22px;
+  padding: 16px;
+  margin: 12px 0;
+}
+
+.metricRow{
+  display:flex;
+  align-items:center;
+  gap: 10px;
+  margin-bottom: 10px;
+}
+
+.metricIcon{
+  width: 34px;
+  height: 34px;
+  border-radius: 12px;
+  display:grid;
+  place-items:center;
+  background: var(--card2);
+}
+
+.metricName{
+  font-weight: 800;
+  font-size: 14px;
+}
+
+.insight{
+  color: rgba(255,255,255,0.92);
+  font-size: 14px;
+  line-height: 1.5;
+  margin: 8px 0 12px;
+}
+
+.divider{
+  height: 1px;
+  background: rgba(255,255,255,0.06);
+  margin: 12px 0;
+}
+
+.numbersRow{
+  display:flex;
+  align-items:flex-start;
+  justify-content:space-between;
+  gap: 12px;
+}
+
+.bigNum{
+  font-size: 34px;
+  font-weight: 900;
+  line-height: 1.05;
+}
+
+.subLabel{
+  color: var(--muted);
+  font-size: 12px;
+  margin-top: 6px;
+}
+
+.tagRow{
+  margin-top: 10px;
+  display:flex;
+  gap: 8px;
+  flex-wrap: wrap;
+}
+
+.tagPill{
+  font-size: 12px;
+  font-weight: 800;
+  padding: 6px 10px;
+  border-radius: 999px;
+  border: 1px solid rgba(255,255,255,0.08);
+  background: rgba(255,255,255,0.06);
+  color: var(--text);
+}
+
+.tagAccent{
+  border-color: rgba(255,255,255,0.08);
+  background: rgba(255,255,255,0.10);
+}
+
+.trendPill{
+  margin-top: 12px;
+  display:flex;
+  align-items:center;
+  justify-content:space-between;
+  padding: 10px 12px;
+  border-radius: 999px;
+  background: rgba(255,255,255,0.06);
+  border: 1px solid rgba(255,255,255,0.06);
+  font-weight: 800;
+  color: white;
+}
+
+.chartWrap{
+  border-top: 1px solid rgba(255,255,255,0.06);
+  padding-top: 12px;
+}
+
+.showAllRow{
+  display:flex;
+  align-items:center;
+  justify-content:space-between;
+  font-weight: 800;
 }
