@@ -3,7 +3,7 @@ import dayjs from "dayjs";
 import { useNavigate } from "react-router-dom";
 
 import TabBar from "../components/TabBar.jsx";
-import { getAllJournals } from "../services/api.js";
+import { getAllJournals, getJournalsByDate } from "../services/api.js";
 
 /** -------- tiny helpers (format + math) -------- */
 function clamp(n, min, max) {
@@ -66,6 +66,11 @@ function TrendChart({ values = [], labels = [], accent = "var(--orange)", onBarC
 
   const avgY = yFor(avg);
   const [hoverIdx, setHoverIdx] = useState(null);
+  const hoverValue = hoverIdx !== null ? values[hoverIdx] : null;
+  const hoverLabel = hoverIdx !== null ? labels[hoverIdx] || `Item ${hoverIdx + 1}` : null;
+  const hoverX =
+    hoverIdx !== null ? pad + hoverIdx * slotW + slotW / 2 : null; // center of bar slot
+  const hoverY = hoverIdx !== null && hoverValue !== null ? yFor(hoverValue) - 6 : null; // a bit above bar
 
   return (
     <div
@@ -162,22 +167,25 @@ function TrendChart({ values = [], labels = [], accent = "var(--orange)", onBarC
         </text>
       </svg>
 
-      {hoverIdx !== null && values[hoverIdx] !== undefined && (
+      {hoverIdx !== null && hoverValue !== null && (
         <div
           style={{
             position: "absolute",
-            top: 4,
-            right: 8,
-            fontSize: 10,
-            fontWeight: 700,
-            color: "white",
+            left: hoverX !== null ? `${(hoverX / W) * 100}%` : "50%",
+            top: hoverY !== null ? hoverY : 0,
+            transform: "translate(-50%, -100%)",
+            fontSize: 12,
+            fontWeight: 800,
+            color: accent,
             padding: "4px 8px",
-            background: "rgba(0,0,0,0.45)",
+            background: "rgba(0,0,0,0.7)",
             borderRadius: 10,
+            border: `1px solid ${accent}`,
             pointerEvents: "none",
+            whiteSpace: "nowrap",
           }}
         >
-          {labels[hoverIdx] || `Item ${hoverIdx + 1}`} • {formatSecondsToMin(values[hoverIdx])}
+          {hoverLabel} • {formatSecondsToMin(hoverValue)}
         </div>
       )}
     </div>
@@ -199,6 +207,20 @@ export default function Stats() {
   const [journals, setJournals] = useState([]);
   const [loading, setLoading] = useState(true);
   const [err, setErr] = useState("");
+  const [streakDate, setStreakDate] = useState("");
+  const [streakJournals, setStreakJournals] = useState([]);
+  const [streakLoading, setStreakLoading] = useState(false);
+  const [streakErr, setStreakErr] = useState("");
+
+  const [dailyDate, setDailyDate] = useState("");
+  const [dailyJournals, setDailyJournals] = useState([]);
+  const [dailyLoading, setDailyLoading] = useState(false);
+  const [dailyErr, setDailyErr] = useState("");
+
+  const [weeklyDate, setWeeklyDate] = useState("");
+  const [weeklyJournals, setWeeklyJournals] = useState([]);
+  const [weeklyLoading, setWeeklyLoading] = useState(false);
+  const [weeklyErr, setWeeklyErr] = useState("");
 
   useEffect(() => {
     let alive = true;
@@ -223,6 +245,35 @@ export default function Stats() {
       alive = false;
     };
   }, []);
+
+  const handleDayClick = React.useCallback(
+    async (date, bucket) => {
+      if (!date) return;
+
+      const setterMap = {
+        streak: { setDate: setStreakDate, setList: setStreakJournals, setLoad: setStreakLoading, setErr: setStreakErr },
+        daily: { setDate: setDailyDate, setList: setDailyJournals, setLoad: setDailyLoading, setErr: setDailyErr },
+        weekly: { setDate: setWeeklyDate, setList: setWeeklyJournals, setLoad: setWeeklyLoading, setErr: setWeeklyErr },
+      };
+
+      const handlers = setterMap[bucket];
+      if (!handlers) return;
+
+      handlers.setDate(date);
+      handlers.setLoad(true);
+      handlers.setErr("");
+      try {
+        const list = await getJournalsByDate(date);
+        handlers.setList(Array.isArray(list) ? list : []);
+      } catch (e) {
+        handlers.setErr(e?.message || "Failed to load journals for this date");
+        handlers.setList([]);
+      } finally {
+        handlers.setLoad(false);
+      }
+    },
+    []
+  );
 
   /** Build “duration per day” + “sessions per day” maps */
   const derived = useMemo(() => {
@@ -441,7 +492,12 @@ export default function Stats() {
 
   return (
     <div className="page statsPage">
-      <div className="sectionTitle">Stats</div>
+      <div className="sectionTitle" style={{ display: "flex", alignItems: "center", gap: 12 }}>
+        <button className="pillButton" onClick={() => nav(-1)} style={{ padding: "6px 12px" }}>
+          {"<"} Back
+        </button>
+        <span>Stats</span>
+      </div>
 
       {loading && <div className="card">Loading stats…</div>}
       {!!err && <div className="card">Error: {err}</div>}
@@ -486,13 +542,81 @@ export default function Stats() {
               </div>
             </div>
 
-            <TrendChart values={derived.last21} labels={derived.last21Dates} accent={ACCENT.streak} />
+            <TrendChart
+              values={derived.last21}
+              labels={derived.last21Dates}
+              accent={ACCENT.streak}
+              onBarClick={(d) => handleDayClick(d, "streak")}
+            />
 
             <div className="trendPill">
               <span>Trend</span>
               <span style={{ opacity: 0.9 }}>{trendRight}</span>
             </div>
           </div>
+
+          {!!streakDate && (
+            <div className="statsCard" style={{ marginTop: 12 }}>
+              <div className="sectionHeader" style={{ marginTop: 0 }}>
+                Journals on {dayjs(streakDate).format("MMM D, YYYY")}
+                <button
+                  className="pillButton"
+                  style={{ marginLeft: 8, padding: "4px 10px", float: "right" }}
+                  onClick={() => {
+                    setStreakDate("");
+                    setStreakJournals([]);
+                    setStreakErr("");
+                  }}
+                >
+                  Close
+                </button>
+              </div>
+
+              {streakLoading && <div className="insight">Loading journals…</div>}
+              {!!streakErr && <div className="insight" style={{ color: "var(--orange)" }}>{streakErr}</div>}
+
+              {!streakLoading && !streakErr && streakJournals.length === 0 && (
+                <div className="insight">No journals found for this date.</div>
+              )}
+
+              {!streakLoading && !streakErr && streakJournals.length > 0 && (
+                <div className="journalList" style={{ display: "grid", gap: 10 }}>
+                  {streakJournals.map((j) => (
+                    <div key={j._id || j.id || j.created_at} className="card" style={{ padding: 12 }}>
+                      <div style={{ display: "flex", justifyContent: "space-between", gap: 12, flexWrap: "wrap" }}>
+                        <div>
+                          <div style={{ fontWeight: 800, marginBottom: 4 }}>
+                            {j.summary ? j.summary.slice(0, 120) : "Journal entry"}
+                            {j.summary && j.summary.length > 120 ? "…" : ""}
+                          </div>
+                          <div style={{ opacity: 0.8, fontSize: 13 }}>
+                            {j.transcript ? j.transcript.slice(0, 120) : "Transcript unavailable"}
+                            {j.transcript && j.transcript.length > 120 ? "…" : ""}
+                          </div>
+                        </div>
+                        <div style={{ textAlign: "right", minWidth: 120 }}>
+                          <div style={{ fontWeight: 700 }}>{formatSecondsToMin(j.duration)}</div>
+                          <div style={{ opacity: 0.7, fontSize: 12 }}>
+                            {j.created_at ? dayjs(j.created_at).format("h:mm A") : streakDate}
+                          </div>
+                        </div>
+                      </div>
+
+                      <div className="tagRow" style={{ marginTop: 8 }}>
+                        <button
+                          className="pillButton"
+                          style={{ padding: "6px 10px" }}
+                          onClick={() => nav(`/journal/${streakDate}`)}
+                        >
+                          Open journal
+                        </button>
+                      </div>
+                    </div>
+                  ))}
+                </div>
+              )}
+            </div>
+          )}
 
           <div className="sectionHeader">Daily Highlights</div>
 
@@ -531,7 +655,12 @@ export default function Stats() {
               </div>
             </div>
 
-            <TrendChart values={derived.last30} labels={derived.last30Dates} accent={ACCENT.duration} />
+            <TrendChart
+              values={derived.last30}
+              labels={derived.last30Dates}
+              accent={ACCENT.duration}
+              onBarClick={(d) => handleDayClick(d, "daily")}
+            />
 
             <div className="trendPill">
               <span>Trend</span>
@@ -544,6 +673,69 @@ export default function Stats() {
               <span className="tagPill">Max {formatSecondsToMin(derived.maxDur)}</span>
             </div>
           </div>
+
+          {!!dailyDate && (
+            <div className="statsCard" style={{ marginTop: 12 }}>
+              <div className="sectionHeader" style={{ marginTop: 0 }}>
+                Journals on {dayjs(dailyDate).format("MMM D, YYYY")}
+                <button
+                  className="pillButton"
+                  style={{ marginLeft: 8, padding: "4px 10px", float: "right" }}
+                  onClick={() => {
+                    setDailyDate("");
+                    setDailyJournals([]);
+                    setDailyErr("");
+                  }}
+                >
+                  Close
+                </button>
+              </div>
+
+              {dailyLoading && <div className="insight">Loading journals…</div>}
+              {!!dailyErr && <div className="insight" style={{ color: "var(--orange)" }}>{dailyErr}</div>}
+
+              {!dailyLoading && !dailyErr && dailyJournals.length === 0 && (
+                <div className="insight">No journals found for this date.</div>
+              )}
+
+              {!dailyLoading && !dailyErr && dailyJournals.length > 0 && (
+                <div className="journalList" style={{ display: "grid", gap: 10 }}>
+                  {dailyJournals.map((j) => (
+                    <div key={j._id || j.id || j.created_at} className="card" style={{ padding: 12 }}>
+                      <div style={{ display: "flex", justifyContent: "space-between", gap: 12, flexWrap: "wrap" }}>
+                        <div>
+                          <div style={{ fontWeight: 800, marginBottom: 4 }}>
+                            {j.summary ? j.summary.slice(0, 120) : "Journal entry"}
+                            {j.summary && j.summary.length > 120 ? "…" : ""}
+                          </div>
+                          <div style={{ opacity: 0.8, fontSize: 13 }}>
+                            {j.transcript ? j.transcript.slice(0, 120) : "Transcript unavailable"}
+                            {j.transcript && j.transcript.length > 120 ? "…" : ""}
+                          </div>
+                        </div>
+                        <div style={{ textAlign: "right", minWidth: 120 }}>
+                          <div style={{ fontWeight: 700 }}>{formatSecondsToMin(j.duration)}</div>
+                          <div style={{ opacity: 0.7, fontSize: 12 }}>
+                            {j.created_at ? dayjs(j.created_at).format("h:mm A") : dailyDate}
+                          </div>
+                        </div>
+                      </div>
+
+                      <div className="tagRow" style={{ marginTop: 8 }}>
+                        <button
+                          className="pillButton"
+                          style={{ padding: "6px 10px" }}
+                          onClick={() => nav(`/journal/${dailyDate}`)}
+                        >
+                          Open journal
+                        </button>
+                      </div>
+                    </div>
+                  ))}
+                </div>
+              )}
+            </div>
+          )}
 
           <div className="sectionHeader">Weekly Highlights</div>
 
@@ -579,13 +771,81 @@ export default function Stats() {
               </div>
             </div>
 
-            <TrendChart values={derived.this7} labels={derived.this7Dates} accent={ACCENT.duration} />
+            <TrendChart
+              values={derived.this7}
+              labels={derived.this7Dates}
+              accent={ACCENT.duration}
+              onBarClick={(d) => handleDayClick(d, "weekly")}
+            />
 
             <div className="trendPill">
               <span>Trend</span>
               <span style={{ opacity: 0.9 }}>{trendRight}</span>
             </div>
           </div>
+
+          {!!weeklyDate && (
+            <div className="statsCard" style={{ marginTop: 12 }}>
+              <div className="sectionHeader" style={{ marginTop: 0 }}>
+                Journals on {dayjs(weeklyDate).format("MMM D, YYYY")}
+                <button
+                  className="pillButton"
+                  style={{ marginLeft: 8, padding: "4px 10px", float: "right" }}
+                  onClick={() => {
+                    setWeeklyDate("");
+                    setWeeklyJournals([]);
+                    setWeeklyErr("");
+                  }}
+                >
+                  Close
+                </button>
+              </div>
+
+              {weeklyLoading && <div className="insight">Loading journals…</div>}
+              {!!weeklyErr && <div className="insight" style={{ color: "var(--orange)" }}>{weeklyErr}</div>}
+
+              {!weeklyLoading && !weeklyErr && weeklyJournals.length === 0 && (
+                <div className="insight">No journals found for this date.</div>
+              )}
+
+              {!weeklyLoading && !weeklyErr && weeklyJournals.length > 0 && (
+                <div className="journalList" style={{ display: "grid", gap: 10 }}>
+                  {weeklyJournals.map((j) => (
+                    <div key={j._id || j.id || j.created_at} className="card" style={{ padding: 12 }}>
+                      <div style={{ display: "flex", justifyContent: "space-between", gap: 12, flexWrap: "wrap" }}>
+                        <div>
+                          <div style={{ fontWeight: 800, marginBottom: 4 }}>
+                            {j.summary ? j.summary.slice(0, 120) : "Journal entry"}
+                            {j.summary && j.summary.length > 120 ? "…" : ""}
+                          </div>
+                          <div style={{ opacity: 0.8, fontSize: 13 }}>
+                            {j.transcript ? j.transcript.slice(0, 120) : "Transcript unavailable"}
+                            {j.transcript && j.transcript.length > 120 ? "…" : ""}
+                          </div>
+                        </div>
+                        <div style={{ textAlign: "right", minWidth: 120 }}>
+                          <div style={{ fontWeight: 700 }}>{formatSecondsToMin(j.duration)}</div>
+                          <div style={{ opacity: 0.7, fontSize: 12 }}>
+                            {j.created_at ? dayjs(j.created_at).format("h:mm A") : weeklyDate}
+                          </div>
+                        </div>
+                      </div>
+
+                      <div className="tagRow" style={{ marginTop: 8 }}>
+                        <button
+                          className="pillButton"
+                          style={{ padding: "6px 10px" }}
+                          onClick={() => nav(`/journal/${weeklyDate}`)}
+                        >
+                          Open journal
+                        </button>
+                      </div>
+                    </div>
+                  ))}
+                </div>
+              )}
+            </div>
+          )}
 
           <div className="sectionHeader">Monthly Highlights</div>
 
