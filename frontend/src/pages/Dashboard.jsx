@@ -52,16 +52,21 @@ export default function Dashboard() {
     return { streak, todayDur, avgLast7 };
   }, [journals]);
 
-  // Mock “journal exists” dates for now (replace with real API data later)
+  // Marked dates from actual journals (current month only)
   const markedDates = useMemo(() => {
+    const set = new Set();
     const now = dayjs();
-    return [
-      now.format("YYYY-MM-01"),
-      now.format("YYYY-MM-03"),
-      now.format("YYYY-MM-06"),
-      now.format("YYYY-MM-10"),
-    ];
-  }, []);
+    const start = now.startOf("month");
+    const end = now.endOf("month");
+    for (const j of journals) {
+      const d = j?.date;
+      if (!d) continue;
+      const dj = dayjs(d);
+      if (dj.isAfter(end) || dj.isBefore(start)) continue;
+      set.add(dj.format("YYYY-MM-DD"));
+    }
+    return Array.from(set);
+  }, [journals]);
 
   const now = dayjs();
   const y = now.year();
@@ -94,7 +99,13 @@ export default function Dashboard() {
           </div>
         </div>
 
-        <MiniCalendar year={y} monthIndex0={m0} markedDates={markedDates} />
+        <MiniCalendar
+          year={y}
+          monthIndex0={m0}
+          markedDates={markedDates}
+          selectedDateIso={now.format("YYYY-MM-DD")}
+          onSelectDate={(iso) => nav(`/calendar?date=${iso}`)}
+        />
       </div>
 
       <div className="sectionTitle">Dashboard</div>

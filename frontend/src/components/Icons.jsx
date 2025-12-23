@@ -1,4 +1,13 @@
-import React from "react";
+import React, {
+  forwardRef,
+  useCallback,
+  useImperativeHandle,
+  useRef,
+} from "react";
+import { motion, useAnimation } from "motion/react";
+
+// Minimal className joiner to mimic the cn helper
+const cn = (...classes) => classes.filter(Boolean).join(" ");
 
 /** Your Dashboard icon (same path you provided) */
 export function DashboardIcon(props) {
@@ -22,15 +31,112 @@ export function ConnectIcon(props) {
   );
 }
 
-export function BotIcon(props) {
-  return (
-    <svg className="i i-robot" viewBox="0 0 24 24" {...props}>
-      <rect width="20" height="14" x="2" y="9" rx="4"></rect>
-      <circle cx="12" cy="3" r="2"></circle>
-      <path d="M12 5v4m-3 8v-2m6 0v2"></path>
-    </svg>
-  );
-}
+export const BotIcon = forwardRef(
+  ({ onMouseEnter, onMouseLeave, className, size = 28, ...props }, ref) => {
+    const controls = useAnimation();
+    const isControlledRef = useRef(false);
+
+    useImperativeHandle(ref, () => {
+      isControlledRef.current = true;
+
+      return {
+        startAnimation: () => controls.start("animate"),
+        stopAnimation: () => controls.start("normal"),
+      };
+    });
+
+    const handleMouseEnter = useCallback(
+      (e) => {
+        if (!isControlledRef.current) {
+          controls.start("animate");
+        } else {
+          onMouseEnter?.(e);
+        }
+      },
+      [controls, onMouseEnter],
+    );
+
+    const handleMouseLeave = useCallback(
+      (e) => {
+        if (!isControlledRef.current) {
+          controls.start("normal");
+        } else {
+          onMouseLeave?.(e);
+        }
+      },
+      [controls, onMouseLeave],
+    );
+
+    return (
+      <div
+        className={cn(className)}
+        onMouseEnter={handleMouseEnter}
+        onMouseLeave={handleMouseLeave}
+        {...props}
+      >
+        <svg
+          xmlns="http://www.w3.org/2000/svg"
+          width={size}
+          height={size}
+          viewBox="0 0 24 24"
+          fill="none"
+          stroke="currentColor"
+          strokeWidth="2"
+          strokeLinecap="round"
+          strokeLinejoin="round"
+        >
+          <path d="M12 8V4H8" />
+          <rect width="16" height="12" x="4" y="8" rx="2" />
+          <path d="M2 14h2" />
+          <path d="M20 14h2" />
+
+          <motion.line
+            x1={15}
+            x2={15}
+            initial="normal"
+            animate={controls}
+            variants={{
+              normal: { y1: 13, y2: 15 },
+              animate: {
+                y1: [13, 14, 13],
+                y2: [15, 14, 15],
+                transition: {
+                  duration: 0.5,
+                  ease: "easeInOut",
+                  delay: 0.2,
+                },
+              },
+            }}
+          />
+
+          <motion.line
+            x1={9}
+            x2={9}
+            initial="normal"
+            animate={controls}
+            variants={{
+              normal: { y1: 13, y2: 15 },
+              animate: {
+                y1: [13, 14, 13],
+                y2: [15, 14, 15],
+                transition: {
+                  duration: 0.5,
+                  ease: "easeInOut",
+                  delay: 0.2,
+                },
+              },
+            }}
+          />
+        </svg>
+      </div>
+    );
+  },
+);
+
+BotIcon.displayName = "Bot";
+
+// Backward-compatible alias if anything imports AnimatedBotIcon
+export const AnimatedBotIcon = BotIcon;
 
 export function PlusIcon(props) {
   return (

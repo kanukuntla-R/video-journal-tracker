@@ -2,6 +2,7 @@
 import React, { useEffect, useMemo, useRef, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import TabBar from "../components/TabBar.jsx";
+import { BotIcon } from "../components/Icons.jsx";
 import { chatWithBot } from "../services/api.js";
 
 /** Small helper: unique id */
@@ -32,6 +33,8 @@ export default function Chatbot() {
 
   const [input, setInput] = useState("");
   const [sending, setSending] = useState(false);
+  const [copiedId, setCopiedId] = useState(null);
+  const copyResetRef = useRef(null);
 
   const scrollerRef = useRef(null);
 
@@ -105,12 +108,47 @@ export default function Chatbot() {
   }
 
   async function copyText(t) {
+    const text = t ?? "";
     try {
-      await navigator.clipboard.writeText(t);
+      if (navigator?.clipboard?.writeText) {
+        await navigator.clipboard.writeText(text);
+        return;
+      }
     } catch {
-      // ignore
+      // fall through to fallback
+    }
+
+    // Fallback for browsers/environments without secure clipboard access
+    try {
+      const ta = document.createElement("textarea");
+      ta.value = text;
+      ta.setAttribute("readonly", "");
+      ta.style.position = "absolute";
+      ta.style.left = "-9999px";
+      document.body.appendChild(ta);
+      ta.select();
+      document.execCommand("copy");
+      document.body.removeChild(ta);
+    } catch {
+      // swallow errors to avoid UI noise
     }
   }
+
+  function showCopied(messageId) {
+    if (copyResetRef.current) {
+      clearTimeout(copyResetRef.current);
+    }
+    setCopiedId(messageId);
+    copyResetRef.current = setTimeout(() => setCopiedId(null), 1200);
+  }
+
+  useEffect(() => {
+    return () => {
+      if (copyResetRef.current) {
+        clearTimeout(copyResetRef.current);
+      }
+    };
+  }, []);
 
   function speakText(t) {
     try {
@@ -155,21 +193,11 @@ export default function Chatbot() {
 
         <div className="chatTitleWrap">
           <div className="chatTitle">
-            Chat bot <span className="chatTitleChevron">›</span>
+            <BotIcon className="chatTitleIcon" size={20} />
+            <span>Chat bot</span>
           </div>
         </div>
 
-        <div className="chatTopRight">
-          <button className="chatTopBtn tap" aria-label="Rename (placeholder)">
-            <Icon>✎</Icon>
-          </button>
-          <button className="chatTopBtn tap" aria-label="Share (placeholder)">
-            <Icon>⤴︎</Icon>
-          </button>
-          <button className="chatTopBtn tap" aria-label="More (placeholder)">
-            <Icon>⋯</Icon>
-          </button>
-        </div>
       </div>
 
       {/* Conversation */}
@@ -193,20 +221,36 @@ export default function Chatbot() {
                 {/* Message action row (assistant only) */}
                 {isAssistant && !m.thinking && (
                   <div className="chatActionRow">
-                    <button className="chatActionBtn tap" onClick={() => copyText(m.text)} title="Copy">
-                      <Icon>⧉</Icon>
-                    </button>
-                    <button className="chatActionBtn tap" onClick={() => speakText(m.text)} title="Listen">
-                      <Icon>🔊</Icon>
-                    </button>
-                    <button className="chatActionBtn tap" title="Thumbs up (placeholder)">
-                      <Icon>👍</Icon>
-                    </button>
-                    <button className="chatActionBtn tap" title="Thumbs down (placeholder)">
-                      <Icon>👎</Icon>
-                    </button>
-                    <button className="chatActionBtn tap" title="Share (placeholder)">
-                      <Icon>↗</Icon>
+                    <button
+                      className="chatActionBtn tap"
+                      onClick={async () => {
+                        await copyText(m.text);
+                        showCopied(m.id);
+                      }}
+                      title="Copy"
+                    >
+                      <Icon>
+                        {copiedId === m.id ? (
+                          <svg
+                            xmlns="http://www.w3.org/2000/svg"
+                            viewBox="0 0 24 24"
+                            role="img"
+                            aria-label="Copied"
+                          >
+                            <path d="M5 13l4 4L19 7" />
+                          </svg>
+                        ) : (
+                          <svg
+                            xmlns="http://www.w3.org/2000/svg"
+                            viewBox="0 0 24 24"
+                            role="img"
+                            aria-label="Copy"
+                          >
+                            <rect x="9" y="9" width="11" height="11" rx="2" />
+                            <rect x="4" y="4" width="11" height="11" rx="2" />
+                          </svg>
+                        )}
+                      </Icon>
                     </button>
                   </div>
                 )}
@@ -240,11 +284,31 @@ export default function Chatbot() {
             aria-label="Send"
             disabled={sending}
           >
-            <Icon>➤</Icon>
+            <Icon>
+              <svg
+                xmlns="http://www.w3.org/2000/svg"
+                viewBox="0 0 24 24"
+                role="img"
+                aria-label="Send"
+              >
+                <path d="M4 5l16 7-16 7 4.5-7L4 5z" />
+              </svg>
+            </Icon>
           </button>
         ) : (
           <button className="chatVoiceBtn tap" onClick={tryVoice} aria-label="Voice input">
-            <Icon>🎙</Icon>
+            <Icon>
+              <svg
+                xmlns="http://www.w3.org/2000/svg"
+                viewBox="0 0 24 24"
+                role="img"
+                aria-label="Mic"
+              >
+                <path d="M12 15a3 3 0 0 0 3-3V6a3 3 0 0 0-6 0v6a3 3 0 0 0 3 3Z" />
+                <path d="M19 11a7 7 0 0 1-14 0" />
+                <path d="M12 19v4" />
+              </svg>
+            </Icon>
           </button>
         )}
       </div>

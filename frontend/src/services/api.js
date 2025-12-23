@@ -53,3 +53,19 @@ export async function chatWithBot({ message, history = [], user_id = "anonymous"
     body: JSON.stringify({ message, history, user_id }),
   });
 }
+
+export async function getStatsSummary({ userId = null, startDate = null, endDate = null } = {}) {
+  const params = new URLSearchParams();
+  if (userId) params.set("user_id", userId);
+  if (startDate) params.set("start_date", startDate);
+  if (endDate) params.set("end_date", endDate);
+  return request(`/stats/summary?${params.toString()}`);
+}
+
+export async function getDailyStats({ userId = null, startDate = null, endDate = null } = {}) {
+  const params = new URLSearchParams();
+  if (userId) params.set("user_id", userId);
+  if (startDate) params.set("start_date", startDate);
+  if (endDate) params.set("end_date", endDate);
+  return request(`/stats/daily?${params.toString()}`);
+}

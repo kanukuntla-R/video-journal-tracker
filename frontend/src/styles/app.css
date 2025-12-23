@@ -208,13 +208,23 @@
   fill: currentColor;
   stroke: currentColor;
 }
-  
-  .tab svg{
-    width: 20px;
-    height: 20px;
-    display: block;
-    filter: drop-shadow(0 0 4px rgba(0,0,0,0.25));
-  }
+
+.tab svg{
+  width: 20px;
+  height: 20px;
+  display: block;
+  filter: drop-shadow(0 0 4px rgba(0,0,0,0.25));
+}
+
+/* Bot icon: keep it outline-only (match supplied icon) */
+.tab .bot-icon svg,
+.tab .bot-icon svg path,
+.tab .bot-icon svg rect,
+.tab .bot-icon svg circle,
+.tab .bot-icon svg line {
+  fill: none;
+  stroke: currentColor;
+}
 
   /* ===== Calendar Page ===== */
 
@@ -657,9 +667,18 @@ audio.mediaPlayer {
 }
 
 .chatTitle {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
   font-weight: 800;
   font-size: 16px;
   letter-spacing: 0.01em;
+}
+
+.chatTitleIcon svg {
+  width: 20px;
+  height: 20px;
+  display: block;
 }
 
 .chatTitleChevron {
@@ -776,11 +795,10 @@ audio.mediaPlayer {
   padding: 0;
 }
 
-/* Send button gets your “accent circle” feel */
 .chatSendBtn {
-  background: var(--cyan);
-  border-color: rgba(255,255,255,0.06);
-  color: #001014;
+  background: rgba(23,23,28,0.8);
+  border-color: rgba(255,255,255,0.10);
+  color: white;
 }
 
 .chatInputPill {
@@ -813,4 +831,27 @@ audio.mediaPlayer {
   font-size: 16px;
   font-weight: 900;
   line-height: 1;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+}
+
+/* Ensure custom fml-icon inherits text color and sizing */
+.chatIcon fml-icon {
+  display: inline-flex;
+  width: 18px;
+  height: 18px;
+  color: inherit;
+}
+
+/* Inline SVG inside chat icons (send icon) */
+.chatIcon svg {
+  width: 18px;
+  height: 18px;
+  display: block;
+  fill: none;
+  stroke: currentColor;
+  stroke-width: 2;
+  stroke-linecap: round;
+  stroke-linejoin: round;
 }
