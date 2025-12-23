@@ -46,3 +46,10 @@ export async function getAllJournals(userId = null, limit = 1000) {
   params.set("limit", limit.toString());
   return request(`/journals?${params.toString()}`);
 }
+export async function chatWithBot({ message, history = [], user_id = "anonymous" }) {
+  return request(`/chat`, {
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify({ message, history, user_id }),
+  });
+}

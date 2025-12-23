@@ -1,24 +1,18 @@
-from multiprocessing.connection import Client
 from typing import List, Optional
-from bson import ObjectId
-from motor.motor_asyncio import AsyncIOMotorClient
 from pydantic import ValidationError
 
-import os
-
-
-MONGO_URL = os.getenv("MONGO_URI", "mongodb://localhost:27017")
-client = AsyncIOMotorClient(MONGO_URL)
-db = client["video_journal_db"]
-journal_collection = db["journal"]
-
-
 from backend.video_service.models.journal import JournalEntry
+from backend.shared.journals_repo import (
+    insert_journal,
+    find_journals,
+    find_journal_by_id,
+)
 
-async def save_journal_entry(entry: JournalEntry):
+
+async def save_journal_entry(entry: JournalEntry) -> str:
+    """Save a JournalEntry to MongoDB via the shared repository layer."""
     entry_dict = entry.dict(by_alias=True, exclude_unset=True, exclude_none=True)
-    result = await journal_collection.insert_one(entry_dict)
-    return str(result.inserted_id)
+    return await insert_journal(entry_dict)
 
 
 async def get_journals(
@@ -26,16 +20,17 @@ async def get_journals(
     date: Optional[str] = None,
     limit: int = 50,
 ) -> List[JournalEntry]:
+    """Fetch journals and convert them into JournalEntry models."""
     query: dict = {}
     if user_id:
         query["user_id"] = user_id
     if date:
-        query["date"] = date  # 'date' is stored as a string in your JournalEntry
+        query["date"] = date
 
-    cursor = journal_collection.find(query).sort("created_at", -1).limit(limit)
+    docs = await find_journals(query=query, limit=limit)
 
     journals: List[JournalEntry] = []
-    async for doc in cursor:
+    for doc in docs:
         try:
             journals.append(JournalEntry(**doc))
         except ValidationError as e:
@@ -46,12 +41,8 @@ async def get_journals(
 
 
 async def get_journal_by_id(journal_id: str) -> Optional[JournalEntry]:
-    try:
-        obj_id = ObjectId(journal_id)
-    except Exception:
-        return None
-
-    doc = await journal_collection.find_one({"_id": obj_id})
+    """Fetch a single journal by Mongo _id string."""
+    doc = await find_journal_by_id(journal_id)
     if not doc:
         return None
 

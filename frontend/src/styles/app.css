@@ -609,3 +609,208 @@ audio.mediaPlayer {
   justify-content:space-between;
   font-weight: 800;
 }
+
+
+
+/* ===== Chatbot Page ===== */
+
+.chatPage {
+  padding-top: 10px;
+  /* extra room because we have BOTH: composer + floating tab bar */
+  padding-bottom: 220px;
+}
+
+/* Top bar */
+.chatTopBar {
+  position: sticky;
+  top: 0;
+  z-index: 5;
+  background: var(--bg);
+  display: grid;
+  grid-template-columns: 56px 1fr 120px;
+  align-items: center;
+  gap: 10px;
+  padding: 8px 0 6px;
+}
+
+.chatTopBtn {
+  width: 44px;
+  height: 44px;
+  border-radius: 999px;
+  border: 1px solid rgba(255,255,255,0.06);
+  background: rgba(23,23,28,0.55);
+  color: var(--text);
+  display: grid;
+  place-items: center;
+  padding: 0;
+}
+
+.chatTopRight {
+  display: flex;
+  justify-content: flex-end;
+  gap: 8px;
+}
+
+.chatTitleWrap {
+  display: grid;
+  place-items: center;
+}
+
+.chatTitle {
+  font-weight: 800;
+  font-size: 16px;
+  letter-spacing: 0.01em;
+}
+
+.chatTitleChevron {
+  opacity: 0.6;
+  font-weight: 900;
+  margin-left: 4px;
+}
+
+/* Conversation */
+.chatScroller {
+  margin-top: 8px;
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+}
+
+.chatMsgRow {
+  display: flex;
+  flex-direction: column;
+}
+
+.chatMsgRow.left { align-items: flex-start; }
+.chatMsgRow.right { align-items: flex-end; }
+
+.chatTopicChipWrap {
+  width: 100%;
+  display: flex;
+  justify-content: flex-end;
+  margin-bottom: 6px;
+}
+
+.chatTopicChip {
+  padding: 8px 12px;
+  border-radius: 999px;
+  background: rgba(255,255,255,0.08);
+  border: 1px solid rgba(255,255,255,0.06);
+  color: white;
+  font-weight: 800;
+  font-size: 12px;
+}
+
+.chatMsg {
+  max-width: 92%;
+}
+
+.chatMsgText {
+  white-space: pre-wrap;
+  line-height: 1.65;
+  font-size: 14px;
+  color: rgba(255,255,255,0.95);
+}
+
+/* User message: subtle bubble (spec said optional) */
+.chatMsg.user .chatMsgText {
+  background: rgba(23,23,28,0.72);
+  border: 1px solid rgba(255,255,255,0.06);
+  border-radius: 16px;
+  padding: 10px 12px;
+  color: rgba(255,255,255,0.88);
+}
+
+/* Assistant message: no bubble */
+.chatMsg.assistant .chatMsgText {
+  padding: 0;
+}
+
+/* Action row under assistant messages */
+.chatActionRow {
+  margin-top: 8px;
+  display: flex;
+  gap: 10px;
+  align-items: center;
+}
+
+.chatActionBtn {
+  width: 34px;
+  height: 34px;
+  border-radius: 999px;
+  border: 1px solid rgba(255,255,255,0.06);
+  background: rgba(23,23,28,0.50);
+  color: rgba(255,255,255,0.85);
+  padding: 0;
+  display: grid;
+  place-items: center;
+}
+
+/* Input bar (fixed, like iOS) */
+.chatComposer {
+  position: fixed;
+  left: 16px;
+  right: 16px;
+
+  /* keep above the floating TabBar */
+  bottom: calc(18px + 68px + 14px + env(safe-area-inset-bottom));
+
+  display: grid;
+  grid-template-columns: 48px 1fr 48px;
+  gap: 10px;
+  align-items: center;
+  z-index: 10;
+}
+
+.chatCircleBtn,
+.chatVoiceBtn,
+.chatSendBtn {
+  width: 48px;
+  height: 48px;
+  border-radius: 999px;
+  border: 1px solid rgba(255,255,255,0.06);
+  background: rgba(23,23,28,0.65);
+  color: white;
+  display: grid;
+  place-items: center;
+  padding: 0;
+}
+
+/* Send button gets your “accent circle” feel */
+.chatSendBtn {
+  background: var(--cyan);
+  border-color: rgba(255,255,255,0.06);
+  color: #001014;
+}
+
+.chatInputPill {
+  height: 48px;
+  border-radius: 999px;
+  background: rgba(23,23,28,0.72);
+  border: 1px solid rgba(255,255,255,0.06);
+  display: flex;
+  align-items: center;
+  padding: 10px 14px;
+}
+
+.chatInput {
+  width: 100%;
+  border: none;
+  outline: none;
+  background: transparent;
+  color: white;
+  resize: none;
+  font-size: 14px;
+  line-height: 1.35;
+  max-height: 120px;
+}
+
+.chatInput::placeholder {
+  color: rgba(255,255,255,0.45);
+}
+
+.chatIcon {
+  font-size: 16px;
+  font-weight: 900;
+  line-height: 1;
+}
