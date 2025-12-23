@@ -16,7 +16,7 @@ export default function TabBar() {
       </NavLink>
 
       <NavLink to="/chatbot" className={({isActive}) => `tab ${isActive ? "active" : ""}`}>
-        <BotIcon />
+        <BotIcon className="bot-icon" />
         <span>Chat bot</span>
       </NavLink>
     </div>

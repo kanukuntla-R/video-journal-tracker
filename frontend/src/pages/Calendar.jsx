@@ -1,6 +1,6 @@
 // FILE: frontend/src/pages/Calendar.jsx
 import React, { useMemo, useRef, useState, useEffect } from "react";
-import { useNavigate } from "react-router-dom";
+import { useNavigate, useSearchParams } from "react-router-dom";
 import dayjs from "dayjs";
 
 import TabBar from "../components/TabBar.jsx";
@@ -21,12 +21,19 @@ function hashToColorIndex(str) {
 
 export default function Calendar() {
   const nav = useNavigate();
+  const [searchParams] = useSearchParams();
+
+  const initialQueryDate = searchParams.get("date");
+  const initialDay =
+    initialQueryDate && dayjs(initialQueryDate).isValid()
+      ? dayjs(initialQueryDate)
+      : dayjs();
 
   // “Month we are currently viewing”
-  const [viewMonth, setViewMonth] = useState(dayjs().startOf("month"));
+  const [viewMonth, setViewMonth] = useState(initialDay.startOf("month"));
 
   // “Selected day” (red circle)
-  const [selectedDay, setSelectedDay] = useState(dayjs());
+  const [selectedDay, setSelectedDay] = useState(initialDay);
 
   // Slide direction for small transition on month change
   const [slideDir, setSlideDir] = useState(null); // "left" | "right" | null
@@ -37,6 +44,27 @@ export default function Calendar() {
   const [dayJournals, setDayJournals] = useState([]);
   const [dayLoading, setDayLoading] = useState(false);
   const [dayErr, setDayErr] = useState("");
+
+  // Sync with ?date=YYYY-MM-DD if provided (e.g., from dashboard)
+  useEffect(() => {
+    const q = searchParams.get("date");
+    if (!q) return;
+    const parsed = dayjs(q);
+    if (!parsed.isValid()) return;
+    const currentIso = selectedDay.format("YYYY-MM-DD");
+    const nextIso = parsed.format("YYYY-MM-DD");
+    if (currentIso === nextIso) return;
+    setSelectedDay(parsed);
+    setViewMonth(parsed.startOf("month"));
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [searchParams, selectedDay]);
+
+  // Load journals whenever selectedDay changes
+  useEffect(() => {
+    if (!selectedDay) return;
+    loadDayJournals(selectedDay);
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [selectedDay]);
 
   useEffect(() => {
     async function fetchJournalDates() {
@@ -206,7 +234,23 @@ export default function Calendar() {
         {!!dayErr && <div className="insight" style={{ color: "var(--orange)" }}>{dayErr}</div>}
 
         {!dayLoading && !dayErr && dayJournals.length === 0 && (
-          <div className="insight">No journals found for this date.</div>
+          <div className="insight" style={{ display: "grid", gap: 10 }}>
+            <div>No journals found for this date.</div>
+            <button
+              className="pillButton"
+              style={{
+                justifySelf: "flex-start",
+                background: "var(--blue)",
+                color: "white",
+                border: "none",
+                padding: "8px 12px",
+                borderRadius: 999,
+              }}
+              onClick={() => openJournal(selectedDay)}
+            >
+              Create journal for {selectedDay.format("MMM D")}
+            </button>
+          </div>
         )}
 
         {!dayLoading && !dayErr && dayJournals.length > 0 && (
