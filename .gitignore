@@ -1,19 +1,26 @@
-# Virtual env
+# Virtual envs
 .venv/
-
-# Env files
+venv/
 .env
+
+# Project env file (if you really want to ignore only this one too)
 backend/video_service/.env
-# storage files
+
+# Generated / runtime folders
 backend/video_service/storage/
-# Temp files
 backend/video_service/temp/
+
+# Python bytecode
+__pycache__/
+*.py[cod]
+*$py.class
+
+# Test / tooling caches (optional but recommended)
+.pytest_cache/
+.mypy_cache/
+.ruff_cache/
+.coverage
+htmlcov/
 
 # macOS junk
 .DS_Store
-
-__pycache__/
-*.pyc
-
-__pycache__/
-*.pyc
