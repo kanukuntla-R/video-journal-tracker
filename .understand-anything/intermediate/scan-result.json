@@ -1,0 +1,227 @@
+{
+  "name": "video-journal-tracker",
+  "description": "A full-stack application for tracking video journal entries with transcription and summarization capabilities.",
+  "languages": [
+    "javascript",
+    "python"
+  ],
+  "frameworks": [
+    "FastAPI",
+    "React",
+    "Vite"
+  ],
+  "files": [
+    {
+      "path": "backend/__init__.py",
+      "language": "python",
+      "sizeLines": 0
+    },
+    {
+      "path": "backend/api_gateway/main.py",
+      "language": "python",
+      "sizeLines": 40
+    },
+    {
+      "path": "backend/chatbot_service/main.py",
+      "language": "python",
+      "sizeLines": 0
+    },
+    {
+      "path": "backend/chatbot_service/routes/__init__.py",
+      "language": "python",
+      "sizeLines": 0
+    },
+    {
+      "path": "backend/chatbot_service/routes/chat_routes.py",
+      "language": "python",
+      "sizeLines": 31
+    },
+    {
+      "path": "backend/chatbot_service/services/__init__.py",
+      "language": "python",
+      "sizeLines": 1
+    },
+    {
+      "path": "backend/chatbot_service/services/chat.py",
+      "language": "python",
+      "sizeLines": 63
+    },
+    {
+      "path": "backend/shared/__init__.py",
+      "language": "python",
+      "sizeLines": 0
+    },
+    {
+      "path": "backend/shared/journals_repo.py",
+      "language": "python",
+      "sizeLines": 26
+    },
+    {
+      "path": "backend/shared/mongo.py",
+      "language": "python",
+      "sizeLines": 13
+    },
+    {
+      "path": "backend/stats_service/main.py",
+      "language": "python",
+      "sizeLines": 10
+    },
+    {
+      "path": "backend/stats_service/models/stats.py",
+      "language": "python",
+      "sizeLines": 19
+    },
+    {
+      "path": "backend/stats_service/routes/stats_routes.py",
+      "language": "python",
+      "sizeLines": 36
+    },
+    {
+      "path": "backend/stats_service/services/stats.py",
+      "language": "python",
+      "sizeLines": 92
+    },
+    {
+      "path": "backend/video_service/__init__.py",
+      "language": "python",
+      "sizeLines": 0
+    },
+    {
+      "path": "backend/video_service/main.py",
+      "language": "python",
+      "sizeLines": 35
+    },
+    {
+      "path": "backend/video_service/models/journal.py",
+      "language": "python",
+      "sizeLines": 59
+    },
+    {
+      "path": "backend/video_service/routes/journal_routes.py",
+      "language": "python",
+      "sizeLines": 76
+    },
+    {
+      "path": "backend/video_service/routes/transcribe_routes.py",
+      "language": "python",
+      "sizeLines": 120
+    },
+    {
+      "path": "backend/video_service/services/__init__.py",
+      "language": "python",
+      "sizeLines": 0
+    },
+    {
+      "path": "backend/video_service/services/database.py",
+      "language": "python",
+      "sizeLines": 49
+    },
+    {
+      "path": "backend/video_service/services/summarize.py",
+      "language": "python",
+      "sizeLines": 19
+    },
+    {
+      "path": "backend/video_service/services/transcribe.py",
+      "language": "python",
+      "sizeLines": 36
+    },
+    {
+      "path": "backend/video_service/test_summary.py",
+      "language": "python",
+      "sizeLines": 6
+    },
+    {
+      "path": "backend/video_service/test_transcribe.py",
+      "language": "python",
+      "sizeLines": 6
+    },
+    {
+      "path": "backend/video_service/utils/extract_audio.py",
+      "language": "python",
+      "sizeLines": 39
+    },
+    {
+      "path": "frontend/eslint.config.js",
+      "language": "javascript",
+      "sizeLines": 29
+    },
+    {
+      "path": "frontend/src/App.jsx",
+      "language": "javascript",
+      "sizeLines": 30
+    },
+    {
+      "path": "frontend/src/components/Card.jsx",
+      "language": "javascript",
+      "sizeLines": 46
+    },
+    {
+      "path": "frontend/src/components/Icons.jsx",
+      "language": "javascript",
+      "sizeLines": 155
+    },
+    {
+      "path": "frontend/src/components/MiniCalendar.jsx",
+      "language": "javascript",
+      "sizeLines": 110
+    },
+    {
+      "path": "frontend/src/components/TabBar.jsx",
+      "language": "javascript",
+      "sizeLines": 24
+    },
+    {
+      "path": "frontend/src/main.jsx",
+      "language": "javascript",
+      "sizeLines": 10
+    },
+    {
+      "path": "frontend/src/pages/Automations.jsx",
+      "language": "javascript",
+      "sizeLines": 13
+    },
+    {
+      "path": "frontend/src/pages/Calendar.jsx",
+      "language": "javascript",
+      "sizeLines": 301
+    },
+    {
+      "path": "frontend/src/pages/Chatbot.jsx",
+      "language": "javascript",
+      "sizeLines": 318
+    },
+    {
+      "path": "frontend/src/pages/Dashboard.jsx",
+      "language": "javascript",
+      "sizeLines": 165
+    },
+    {
+      "path": "frontend/src/pages/Integrations.jsx",
+      "language": "javascript",
+      "sizeLines": 13
+    },
+    {
+      "path": "frontend/src/pages/Journal.jsx",
+      "language": "javascript",
+      "sizeLines": 282
+    },
+    {
+      "path": "frontend/src/pages/Stats.jsx",
+      "language": "javascript",
+      "sizeLines": 945
+    },
+    {
+      "path": "frontend/src/services/api.js",
+      "language": "javascript",
+      "sizeLines": 70
+    },
+    {
+      "path": "frontend/vite.config.js",
+      "language": "javascript",
+      "sizeLines": 7
+    }
+  ],
+  "totalFiles": 42,
+  "estimatedComplexity": "moderate"
+}
