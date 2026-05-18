@@ -1,0 +1,1525 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>VJ — your second brain.</title>
+<meta name="description" content="Record video journals. Auto-transcribe, summarize, and ask your past self anything." />
+<link rel="preconnect" href="https://fonts.googleapis.com" />
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+<link href="https://fonts.googleapis.com/css2?family=Manrope:wght@400;500;600;700;800&family=JetBrains+Mono:wght@400;500;600&display=swap" rel="stylesheet" />
+<style>
+  /* =========== Reset =========== */
+  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+  :root {
+    --bg: #000000;
+    --card: #161616;
+    --card-2: #1F1F1F;
+    --card-3: #2A2A2A;
+    --line: rgba(255, 255, 255, 0.06);
+    --line-strong: rgba(255, 255, 255, 0.12);
+    --text: #FFFFFF;
+    --text-2: rgba(255, 255, 255, 0.65);
+    --text-3: rgba(255, 255, 255, 0.42);
+    --text-4: rgba(255, 255, 255, 0.28);
+    --blue: #3B82F6;
+    --blue-2: #5B9DFF;
+    --orange: #FF6B35;
+    --purple: #A78BFA;
+    --green: #34C759;
+    --pink: #FF6B9D;
+    --radius-card: 28px;
+    --radius-sm: 16px;
+    --radius-pill: 999px;
+  }
+
+  html { scroll-behavior: smooth; -webkit-text-size-adjust: 100%; }
+
+  body {
+    background: var(--bg);
+    color: var(--text);
+    font-family: "Manrope", -apple-system, BlinkMacSystemFont, sans-serif;
+    font-weight: 500;
+    font-size: 16px;
+    line-height: 1.5;
+    overflow-x: hidden;
+    min-height: 100vh;
+    position: relative;
+    letter-spacing: -0.005em;
+  }
+
+  ::selection { background: var(--blue); color: var(--text); }
+
+  a { color: inherit; text-decoration: none; }
+  button { font-family: inherit; cursor: pointer; }
+
+  /* =========== Type utilities =========== */
+  .label {
+    font-family: "Manrope", sans-serif;
+    font-size: 12px;
+    font-weight: 700;
+    letter-spacing: 0.10em;
+    text-transform: uppercase;
+    color: var(--text-3);
+  }
+
+  /* =========== Layout =========== */
+  .wrap {
+    max-width: 1240px;
+    margin: 0 auto;
+    padding: 0 24px;
+    position: relative;
+  }
+
+  /* =========== Nav =========== */
+  .nav {
+    position: sticky;
+    top: 0;
+    z-index: 50;
+    backdrop-filter: blur(24px) saturate(160%);
+    -webkit-backdrop-filter: blur(24px) saturate(160%);
+    background: rgba(0,0,0,0.6);
+    border-bottom: 1px solid var(--line);
+  }
+  .nav-inner {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    height: 68px;
+  }
+  .brand {
+    display: flex; align-items: center; gap: 10px;
+    font-weight: 800;
+    font-size: 16px;
+    letter-spacing: -0.01em;
+  }
+  .brand-mark {
+    width: 28px; height: 28px;
+    border-radius: 8px;
+    background: var(--blue);
+    display: grid; place-items: center;
+    color: white;
+    font-weight: 800;
+    font-size: 12px;
+    letter-spacing: 0;
+    font-family: "JetBrains Mono", monospace;
+  }
+  .nav-links {
+    display: flex; gap: 32px;
+    font-size: 14px;
+    font-weight: 600;
+    color: var(--text-2);
+  }
+  .nav-links a { transition: color .2s ease; }
+  .nav-links a:hover { color: var(--text); }
+  @media (max-width: 760px) { .nav-links { display: none; } }
+
+  /* =========== Buttons =========== */
+  .btn {
+    display: inline-flex; align-items: center; gap: 8px;
+    padding: 11px 18px;
+    border-radius: var(--radius-pill);
+    font-size: 14px;
+    font-weight: 700;
+    letter-spacing: -0.005em;
+    border: 1px solid var(--line-strong);
+    background: var(--card);
+    color: var(--text);
+    transition: transform .2s ease, background .2s ease, border-color .2s ease;
+    cursor: pointer;
+  }
+  .btn:hover { background: var(--card-2); border-color: rgba(255,255,255,0.22); transform: translateY(-1px); }
+  .btn-primary {
+    background: var(--blue);
+    color: white;
+    border-color: var(--blue);
+  }
+  .btn-primary:hover {
+    background: var(--blue-2);
+    border-color: var(--blue-2);
+  }
+  .btn svg { width: 16px; height: 16px; }
+
+  /* =========== Hero =========== */
+  .hero {
+    padding: 90px 0 60px;
+    position: relative;
+  }
+  .hero::before {
+    content: "";
+    position: absolute;
+    top: -10%;
+    left: 50%;
+    transform: translateX(-50%);
+    width: 60%;
+    height: 100%;
+    background: radial-gradient(ellipse at center, rgba(59,130,246,0.18), transparent 60%);
+    pointer-events: none;
+    z-index: 0;
+    filter: blur(40px);
+  }
+  .hero-grid {
+    position: relative;
+    z-index: 1;
+    display: grid;
+    grid-template-columns: 1.1fr 1fr;
+    gap: 60px;
+    align-items: center;
+  }
+  @media (max-width: 960px) {
+    .hero-grid { grid-template-columns: 1fr; gap: 56px; }
+    .hero { padding: 60px 0 40px; }
+  }
+
+  .eyebrow {
+    display: inline-flex;
+    align-items: center;
+    gap: 10px;
+    padding: 6px 14px 6px 8px;
+    border-radius: var(--radius-pill);
+    background: var(--card);
+    border: 1px solid var(--line);
+    font-size: 12px;
+    font-weight: 600;
+    color: var(--text-2);
+    margin-bottom: 32px;
+  }
+  .eyebrow .new-pill {
+    background: var(--blue);
+    color: white;
+    padding: 2px 10px;
+    border-radius: var(--radius-pill);
+    font-size: 11px;
+    font-weight: 700;
+    letter-spacing: 0.04em;
+  }
+
+  .hero h1 {
+    font-size: clamp(3rem, 7.5vw, 6.5rem);
+    font-weight: 800;
+    line-height: 0.98;
+    letter-spacing: -0.035em;
+    margin-bottom: 28px;
+  }
+  .hero h1 .grad {
+    background: linear-gradient(135deg, var(--orange) 0%, var(--pink) 50%, var(--purple) 100%);
+    -webkit-background-clip: text;
+    background-clip: text;
+    color: transparent;
+  }
+
+  .lead {
+    font-size: 1.2rem;
+    line-height: 1.5;
+    color: var(--text-2);
+    max-width: 500px;
+    margin-bottom: 36px;
+    font-weight: 500;
+  }
+
+  .cta-row {
+    display: flex;
+    gap: 10px;
+    flex-wrap: wrap;
+    align-items: center;
+    margin-bottom: 48px;
+  }
+
+  .trust-row {
+    display: flex; gap: 28px; flex-wrap: wrap;
+    font-size: 13px;
+    color: var(--text-3);
+    font-weight: 600;
+  }
+  .trust-row .item { display: flex; align-items: center; gap: 8px; }
+  .trust-row svg { color: var(--green); width: 16px; height: 16px; }
+
+  /* =========== Phone Mockup =========== */
+  .phone-stage {
+    position: relative;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    min-height: 720px;
+  }
+  .phone-stage::before {
+    content: "";
+    position: absolute;
+    inset: 5% -5%;
+    background: radial-gradient(ellipse at center, rgba(59,130,246,0.14), rgba(255,107,53,0.08), transparent 60%);
+    filter: blur(60px);
+    z-index: 0;
+  }
+  .phone {
+    position: relative;
+    width: 340px;
+    border-radius: 48px;
+    padding: 12px;
+    background: linear-gradient(160deg, #2A2A2A 0%, #0A0A0A 100%);
+    box-shadow:
+      0 40px 100px -20px rgba(0,0,0,0.7),
+      0 0 0 1px rgba(255,255,255,0.06) inset,
+      0 0 0 0.5px rgba(255,255,255,0.14);
+    z-index: 1;
+  }
+  @media (max-width: 960px) {
+    .phone { margin: 0 auto; }
+  }
+  .phone-screen {
+    background: #000000;
+    border-radius: 38px;
+    overflow: hidden;
+    padding: 22px 18px 18px;
+    min-height: 680px;
+    position: relative;
+  }
+  .notch {
+    width: 110px; height: 28px;
+    background: #000;
+    border-radius: 0 0 16px 16px;
+    margin: -22px auto 14px;
+    position: relative;
+  }
+  .notch::after {
+    content: "";
+    position: absolute;
+    top: 8px; right: 18px;
+    width: 8px; height: 8px;
+    background: #111;
+    border-radius: 50%;
+  }
+
+  /* Calendar header */
+  .phone-section-title {
+    font-size: 16px;
+    font-weight: 800;
+    letter-spacing: -0.01em;
+    margin: 8px 0 12px;
+  }
+
+  .cal-card {
+    background: var(--card);
+    border-radius: var(--radius-card);
+    padding: 18px 16px;
+  }
+  .cal-top {
+    display: flex;
+    justify-content: space-between;
+    align-items: flex-start;
+    margin-bottom: 6px;
+  }
+  .cal-top .l-label {
+    font-size: 10px;
+    font-weight: 700;
+    letter-spacing: 0.08em;
+    color: var(--text-3);
+    text-transform: uppercase;
+  }
+  .cal-top .l-month {
+    font-size: 24px;
+    font-weight: 800;
+    letter-spacing: -0.02em;
+    margin-top: 2px;
+  }
+  .cal-top .r-today { font-size: 10px; font-weight: 700; letter-spacing: 0.06em; color: var(--text-3); text-transform: uppercase; text-align: right; }
+  .cal-top .r-date {
+    font-size: 22px;
+    font-weight: 800;
+    text-align: right;
+    margin-top: 2px;
+    letter-spacing: -0.02em;
+  }
+  .cal-top .r-chev {
+    color: var(--text-3);
+    font-size: 16px;
+    text-align: right;
+    margin-top: 2px;
+  }
+
+  .cal-meta {
+    display: flex;
+    justify-content: space-between;
+    font-size: 10px;
+    color: var(--text-3);
+    font-weight: 600;
+    margin: 10px 0 6px;
+  }
+  .cal-grid {
+    display: grid;
+    grid-template-columns: repeat(7, 1fr);
+    gap: 4px;
+    text-align: center;
+  }
+  .cal-dow {
+    font-size: 9px;
+    color: var(--text-3);
+    font-weight: 600;
+    padding: 4px 0;
+    letter-spacing: 0.04em;
+  }
+  .cal-day {
+    padding: 7px 0 12px;
+    font-size: 12px;
+    font-weight: 700;
+    position: relative;
+    color: var(--text);
+  }
+  .cal-day.empty { color: transparent; }
+  .cal-day .dot {
+    width: 3.5px; height: 3.5px;
+    background: var(--text);
+    border-radius: 50%;
+    position: absolute;
+    bottom: 4px;
+    left: 50%;
+    transform: translateX(-50%);
+  }
+  .cal-day.today { color: var(--blue); }
+
+  /* Dashboard cards */
+  .dash-card {
+    background: var(--card);
+    border-radius: var(--radius-card);
+    padding: 16px;
+    margin-top: 12px;
+    display: grid;
+    grid-template-columns: 44px 1fr auto;
+    align-items: center;
+    gap: 14px;
+  }
+  .dash-icon-wrap {
+    width: 44px; height: 44px;
+    border-radius: 14px;
+    background: var(--card-2);
+    display: grid; place-items: center;
+    font-size: 22px;
+  }
+  .dash-text .dash-label {
+    font-size: 10px;
+    font-weight: 700;
+    letter-spacing: 0.08em;
+    color: var(--text-3);
+    text-transform: uppercase;
+    margin-bottom: 4px;
+  }
+  .dash-text .dash-value {
+    font-size: 26px;
+    font-weight: 800;
+    letter-spacing: -0.02em;
+    line-height: 1;
+  }
+  .dash-right {
+    text-align: right;
+    display: flex;
+    flex-direction: column;
+    align-items: flex-end;
+    gap: 4px;
+  }
+  .dash-right .r-top {
+    font-size: 10px;
+    font-weight: 700;
+    letter-spacing: 0.06em;
+    color: var(--text-3);
+    text-transform: uppercase;
+  }
+  .dash-right .bars {
+    display: flex; gap: 2.5px; align-items: flex-end;
+    height: 22px;
+    padding: 2px 0;
+  }
+  .dash-right .bars span {
+    width: 3.5px;
+    background: var(--text-4);
+    border-radius: 2px;
+  }
+  .dash-right .bars span.peak.orange { background: var(--orange); }
+  .dash-right .bars span.peak.purple { background: var(--purple); }
+  .dash-right .r-sub {
+    font-size: 11px;
+    color: var(--text-2);
+    font-weight: 600;
+  }
+  .dash-right .r-link {
+    font-size: 12px;
+    color: var(--text-3);
+    font-weight: 600;
+  }
+
+  /* Create floating button */
+  .create-fab {
+    position: absolute;
+    bottom: 80px;
+    right: 16px;
+    background: var(--blue);
+    color: white;
+    border-radius: var(--radius-pill);
+    padding: 11px 18px 11px 14px;
+    display: inline-flex;
+    align-items: center;
+    gap: 10px;
+    font-weight: 700;
+    font-size: 14px;
+    box-shadow: 0 12px 30px -8px rgba(59,130,246,0.6);
+  }
+  .create-fab .ic {
+    width: 22px; height: 22px;
+    display: grid; place-items: center;
+  }
+
+  /* Tab bar */
+  .tab-bar {
+    position: absolute;
+    bottom: 14px;
+    left: 14px;
+    right: 14px;
+    background: rgba(20,20,20,0.92);
+    backdrop-filter: blur(20px);
+    -webkit-backdrop-filter: blur(20px);
+    border-radius: var(--radius-pill);
+    padding: 8px;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    border: 1px solid var(--line);
+  }
+  .tab-item {
+    flex: 1;
+    display: flex; align-items: center; justify-content: center;
+    gap: 6px;
+    padding: 9px 10px;
+    border-radius: var(--radius-pill);
+    font-size: 11px;
+    font-weight: 700;
+    color: var(--text-3);
+  }
+  .tab-item.active {
+    background: rgba(255,255,255,0.06);
+    color: var(--text);
+  }
+  .tab-item svg { width: 16px; height: 16px; }
+
+  /* Floating annotation chips around phone */
+  .anno {
+    position: absolute;
+    z-index: 2;
+    background: var(--card);
+    border: 1px solid var(--line-strong);
+    border-radius: 12px;
+    padding: 10px 14px;
+    font-size: 12px;
+    font-weight: 600;
+    color: var(--text);
+    display: flex; align-items: center; gap: 8px;
+    box-shadow: 0 14px 40px -10px rgba(0,0,0,0.5);
+  }
+  .anno .ac-dot {
+    width: 8px; height: 8px;
+    border-radius: 50%;
+  }
+  .anno.tl { top: 64px; left: -10px; }
+  .anno.bl { bottom: 240px; left: -30px; }
+  .anno.tr { top: 200px; right: -20px; }
+  .anno-line {
+    font-size: 10px;
+    color: var(--text-3);
+    margin-top: 2px;
+    font-weight: 500;
+  }
+  @media (max-width: 540px) {
+    .anno.tl, .anno.bl { left: -4px; }
+    .anno.tr { right: -4px; }
+  }
+
+  /* =========== Logo Strip =========== */
+  .logo-strip {
+    padding: 30px 0 60px;
+    text-align: center;
+  }
+  .logo-strip .lbl {
+    font-size: 11px;
+    font-weight: 600;
+    letter-spacing: 0.16em;
+    color: var(--text-3);
+    text-transform: uppercase;
+    margin-bottom: 22px;
+  }
+  .logo-strip .row {
+    display: flex; justify-content: center; align-items: center;
+    gap: 50px;
+    flex-wrap: wrap;
+    color: var(--text-3);
+    font-size: 18px;
+    font-weight: 700;
+  }
+  .logo-strip .row .it {
+    display: flex; align-items: center; gap: 8px;
+    transition: color .2s ease;
+  }
+  .logo-strip .row .it:hover { color: var(--text-2); }
+
+  /* =========== Section =========== */
+  .section-pad { padding: 100px 0; }
+  .section-head {
+    margin-bottom: 64px;
+    text-align: left;
+    max-width: 800px;
+  }
+  .section-head .label { margin-bottom: 18px; }
+  .section-head h2 {
+    font-size: clamp(2.4rem, 5.5vw, 4.2rem);
+    font-weight: 800;
+    line-height: 1;
+    letter-spacing: -0.035em;
+    margin-bottom: 24px;
+  }
+  .section-head p {
+    color: var(--text-2);
+    font-size: 1.15rem;
+    line-height: 1.5;
+    max-width: 580px;
+  }
+
+  /* =========== Feature Grid =========== */
+  .feature-grid {
+    display: grid;
+    grid-template-columns: repeat(12, 1fr);
+    gap: 16px;
+  }
+  .feature {
+    background: var(--card);
+    border-radius: var(--radius-card);
+    padding: 32px;
+    min-height: 320px;
+    position: relative;
+    overflow: hidden;
+    transition: transform .25s ease, background .25s ease;
+    border: 1px solid var(--line);
+  }
+  .feature:hover {
+    transform: translateY(-3px);
+    background: var(--card-2);
+  }
+  .feature.wide { grid-column: span 7; }
+  .feature.tall { grid-column: span 5; }
+  .feature.third { grid-column: span 4; }
+  @media (max-width: 900px) {
+    .feature.wide, .feature.tall, .feature.third { grid-column: span 12; }
+  }
+  .feature .num {
+    position: absolute;
+    top: 28px; right: 32px;
+    font-family: "JetBrains Mono", monospace;
+    font-size: 11px;
+    color: var(--text-3);
+    font-weight: 600;
+  }
+  .feature .icon {
+    width: 52px; height: 52px;
+    border-radius: 16px;
+    background: var(--card-2);
+    display: grid; place-items: center;
+    margin-bottom: 28px;
+  }
+  .feature .icon.blue { background: rgba(59,130,246,0.15); color: var(--blue); }
+  .feature .icon.orange { background: rgba(255,107,53,0.15); color: var(--orange); }
+  .feature .icon.purple { background: rgba(167,139,250,0.15); color: var(--purple); }
+  .feature .icon.green { background: rgba(52,199,89,0.15); color: var(--green); }
+  .feature .icon.pink { background: rgba(255,107,157,0.15); color: var(--pink); }
+  .feature .icon svg { width: 26px; height: 26px; stroke-width: 2; }
+
+  .feature h3 {
+    font-size: 1.6rem;
+    font-weight: 800;
+    line-height: 1.1;
+    letter-spacing: -0.02em;
+    margin-bottom: 14px;
+  }
+  .feature p {
+    color: var(--text-2);
+    font-size: 1rem;
+    line-height: 1.55;
+    font-weight: 500;
+  }
+
+  /* Tag chips */
+  .chips {
+    display: flex; gap: 8px; flex-wrap: wrap; margin-top: 24px;
+  }
+  .chip {
+    padding: 6px 12px;
+    background: var(--card-3);
+    border-radius: var(--radius-pill);
+    font-size: 12px;
+    font-weight: 600;
+    color: var(--text-2);
+  }
+
+  /* Chat preview in feature */
+  .chat-preview {
+    display: flex; flex-direction: column; gap: 8px;
+    margin-top: 22px;
+  }
+  .bubble {
+    padding: 10px 14px;
+    border-radius: 18px;
+    font-size: 13px;
+    line-height: 1.4;
+    max-width: 85%;
+    font-weight: 500;
+  }
+  .bubble.user {
+    align-self: flex-end;
+    background: var(--blue);
+    color: white;
+    border-bottom-right-radius: 6px;
+  }
+  .bubble.ai {
+    align-self: flex-start;
+    background: var(--card-3);
+    color: var(--text);
+    border-bottom-left-radius: 6px;
+  }
+
+  /* Stats bar mini in feature */
+  .mini-bars {
+    display: flex; gap: 4px; align-items: flex-end;
+    height: 60px;
+    margin-top: 22px;
+  }
+  .mini-bars span {
+    flex: 1;
+    background: var(--text-4);
+    border-radius: 3px;
+  }
+  .mini-bars span.hot { background: var(--orange); }
+
+  /* Mini calendar in feature */
+  .mini-cal {
+    display: grid;
+    grid-template-columns: repeat(7, 1fr);
+    gap: 4px;
+    margin-top: 22px;
+  }
+  .mini-cal .d {
+    aspect-ratio: 1;
+    border-radius: 5px;
+    background: var(--card-3);
+  }
+  .mini-cal .d.on { background: var(--blue); }
+  .mini-cal .d.med { background: rgba(59,130,246,0.5); }
+
+  /* =========== How It Works =========== */
+  .steps {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 20px;
+  }
+  @media (max-width: 800px) { .steps { grid-template-columns: 1fr; } }
+  .step {
+    background: var(--card);
+    border-radius: var(--radius-card);
+    padding: 32px;
+    position: relative;
+    border: 1px solid var(--line);
+  }
+  .step .step-num {
+    width: 36px; height: 36px;
+    border-radius: 50%;
+    background: var(--card-2);
+    display: grid; place-items: center;
+    font-family: "JetBrains Mono", monospace;
+    font-size: 13px;
+    font-weight: 700;
+    color: var(--text);
+    margin-bottom: 24px;
+  }
+  .step h4 {
+    font-size: 1.4rem;
+    font-weight: 800;
+    line-height: 1.1;
+    letter-spacing: -0.015em;
+    margin-bottom: 12px;
+  }
+  .step p {
+    color: var(--text-2);
+    font-size: 0.98rem;
+    line-height: 1.55;
+    font-weight: 500;
+  }
+  .step-visual {
+    margin-top: 26px;
+    height: 120px;
+    border-radius: var(--radius-sm);
+    background: var(--card-2);
+    display: grid; place-items: center;
+    overflow: hidden;
+    position: relative;
+  }
+  .vis-rec {
+    width: 60px; height: 60px;
+    border-radius: 50%;
+    background: var(--orange);
+    box-shadow: 0 0 0 10px rgba(255,107,53,0.15), 0 0 0 20px rgba(255,107,53,0.06);
+    animation: pulseRec 2s ease-out infinite;
+  }
+  @keyframes pulseRec {
+    0%, 100% { box-shadow: 0 0 0 10px rgba(255,107,53,0.15), 0 0 0 20px rgba(255,107,53,0.06); }
+    50% { box-shadow: 0 0 0 12px rgba(255,107,53,0.25), 0 0 0 28px rgba(255,107,53,0.1); }
+  }
+  .vis-wave {
+    display: flex; align-items: center; gap: 4px;
+    width: 70%; height: 60%;
+  }
+  .vis-wave span {
+    flex: 1;
+    background: var(--blue);
+    border-radius: 3px;
+    animation: wave 1.4s ease-in-out infinite;
+  }
+  .vis-wave span:nth-child(1) { height: 30%; animation-delay: 0s; }
+  .vis-wave span:nth-child(2) { height: 60%; animation-delay: 0.1s; }
+  .vis-wave span:nth-child(3) { height: 90%; animation-delay: 0.2s; }
+  .vis-wave span:nth-child(4) { height: 50%; animation-delay: 0.3s; }
+  .vis-wave span:nth-child(5) { height: 75%; animation-delay: 0.4s; }
+  .vis-wave span:nth-child(6) { height: 40%; animation-delay: 0.5s; }
+  .vis-wave span:nth-child(7) { height: 80%; animation-delay: 0.6s; }
+  .vis-wave span:nth-child(8) { height: 55%; animation-delay: 0.7s; }
+  .vis-wave span:nth-child(9) { height: 35%; animation-delay: 0.8s; }
+  .vis-wave span:nth-child(10) { height: 65%; animation-delay: 0.9s; }
+  .vis-wave span:nth-child(11) { height: 45%; animation-delay: 1.0s; }
+  .vis-wave span:nth-child(12) { height: 70%; animation-delay: 1.1s; }
+  @keyframes wave {
+    0%, 100% { transform: scaleY(0.4); }
+    50% { transform: scaleY(1); }
+  }
+  .vis-chat {
+    width: 100%;
+    padding: 14px;
+    display: flex; flex-direction: column; gap: 6px;
+  }
+  .vis-chat .q {
+    align-self: flex-end;
+    background: var(--blue);
+    color: white;
+    padding: 6px 12px;
+    border-radius: 14px;
+    border-bottom-right-radius: 4px;
+    font-size: 11px;
+    font-weight: 600;
+  }
+  .vis-chat .a {
+    align-self: flex-start;
+    background: var(--card-3);
+    padding: 6px 12px;
+    border-radius: 14px;
+    border-bottom-left-radius: 4px;
+    font-size: 11px;
+    color: var(--text);
+    font-weight: 500;
+  }
+
+  /* =========== Stats Showcase =========== */
+  .stats-grid {
+    display: grid;
+    grid-template-columns: 1.4fr 1fr 1fr;
+    gap: 16px;
+  }
+  @media (max-width: 900px) {
+    .stats-grid { grid-template-columns: 1fr; }
+  }
+  .stat-card {
+    background: var(--card);
+    border-radius: var(--radius-card);
+    padding: 28px;
+    border: 1px solid var(--line);
+    position: relative;
+    overflow: hidden;
+  }
+  .stat-card .s-label {
+    font-size: 11px;
+    font-weight: 700;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+    color: var(--text-3);
+    margin-bottom: 16px;
+  }
+  .stat-card .s-value {
+    font-size: clamp(2.5rem, 5vw, 4rem);
+    font-weight: 800;
+    line-height: 1;
+    letter-spacing: -0.035em;
+    margin-bottom: 8px;
+  }
+  .stat-card .s-value .unit {
+    font-size: 0.4em;
+    color: var(--text-3);
+    font-weight: 700;
+    margin-left: 4px;
+  }
+  .stat-card .s-value.grad {
+    background: linear-gradient(135deg, var(--orange), var(--pink));
+    -webkit-background-clip: text;
+    background-clip: text;
+    color: transparent;
+  }
+  .stat-card .s-sub {
+    color: var(--text-2);
+    font-size: 0.95rem;
+    line-height: 1.5;
+    font-weight: 500;
+  }
+  .big-bars {
+    display: flex;
+    align-items: flex-end;
+    gap: 5px;
+    height: 68px;
+    margin-top: 22px;
+  }
+  .big-bars span {
+    flex: 1;
+    background: var(--orange);
+    border-radius: 3px;
+    opacity: 0.85;
+  }
+  .grid-cal-14 {
+    display: grid;
+    grid-template-columns: repeat(14, 1fr);
+    gap: 4px;
+    margin-top: 22px;
+  }
+  .grid-cal-14 .d {
+    aspect-ratio: 1;
+    border-radius: 5px;
+    background: var(--card-2);
+  }
+  .grid-cal-14 .d.on { background: var(--blue); }
+  .grid-cal-14 .d.med { background: rgba(59,130,246,0.5); }
+
+  /* =========== Quote =========== */
+  .quote-section {
+    padding: 80px 0;
+    text-align: center;
+  }
+  .pull-quote {
+    font-size: clamp(1.8rem, 3.8vw, 3rem);
+    font-weight: 700;
+    line-height: 1.15;
+    letter-spacing: -0.025em;
+    max-width: 900px;
+    margin: 0 auto 32px;
+  }
+  .pull-quote .acc { color: var(--blue); }
+  .quote-attr {
+    font-size: 13px;
+    color: var(--text-3);
+    font-weight: 600;
+    letter-spacing: 0.04em;
+  }
+
+  /* =========== Final CTA =========== */
+  .final-cta {
+    background: var(--card);
+    border-radius: var(--radius-card);
+    padding: 80px 40px;
+    text-align: center;
+    position: relative;
+    overflow: hidden;
+    margin-bottom: 80px;
+    border: 1px solid var(--line);
+  }
+  .final-cta::before {
+    content: "";
+    position: absolute;
+    top: -50%;
+    left: 50%;
+    width: 60%;
+    height: 100%;
+    transform: translateX(-50%);
+    background: radial-gradient(ellipse at center, rgba(59,130,246,0.30), transparent 60%);
+    filter: blur(40px);
+    pointer-events: none;
+  }
+  .final-cta > * { position: relative; }
+  .final-cta h2 {
+    font-size: clamp(2.6rem, 6vw, 5rem);
+    font-weight: 800;
+    line-height: 1;
+    letter-spacing: -0.035em;
+    margin-bottom: 22px;
+    max-width: 800px;
+    margin-left: auto;
+    margin-right: auto;
+  }
+  .final-cta h2 .grad {
+    background: linear-gradient(135deg, var(--orange), var(--pink), var(--purple));
+    -webkit-background-clip: text;
+    background-clip: text;
+    color: transparent;
+  }
+  .final-cta p {
+    color: var(--text-2);
+    font-size: 1.1rem;
+    max-width: 560px;
+    margin: 0 auto 36px;
+    line-height: 1.5;
+    font-weight: 500;
+  }
+  .final-cta .btn { padding: 14px 24px; font-size: 14px; }
+
+  /* =========== Footer =========== */
+  footer {
+    border-top: 1px solid var(--line);
+    padding: 40px 0;
+  }
+  .footer-inner {
+    display: flex; justify-content: space-between;
+    align-items: center;
+    flex-wrap: wrap;
+    gap: 20px;
+    font-size: 13px;
+    color: var(--text-3);
+    font-weight: 600;
+  }
+  .footer-inner a { transition: color .2s ease; }
+  .footer-inner a:hover { color: var(--text); }
+  .footer-inner .links { display: flex; gap: 28px; }
+
+  /* =========== Reveal =========== */
+  .reveal {
+    opacity: 0;
+    transform: translateY(24px);
+    transition: opacity 0.8s ease, transform 0.8s ease;
+  }
+  .reveal.in {
+    opacity: 1;
+    transform: translateY(0);
+  }
+</style>
+</head>
+<body>
+
+<!-- ============== NAV ============== -->
+<nav class="nav">
+  <div class="wrap nav-inner">
+    <div class="brand">
+      <span class="brand-mark">VJ</span>
+      Video Journal
+    </div>
+    <div class="nav-links">
+      <a href="#features">Features</a>
+      <a href="#how">How it works</a>
+      <a href="#stats">Stats</a>
+      <a href="#cta">Pricing</a>
+    </div>
+    <a href="/" class="btn btn-primary">
+      Start free
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12h14"/><path d="m12 5 7 7-7 7"/></svg>
+    </a>
+  </div>
+</nav>
+
+<!-- ============== HERO ============== -->
+<section class="hero">
+  <div class="wrap">
+    <div class="hero-grid">
+      <div>
+        <div class="eyebrow">
+          <span class="new-pill">NEW</span>
+          AI-powered second brain
+        </div>
+
+        <h1>
+          Your past self,<br />
+          <span class="grad">on speed-dial.</span>
+        </h1>
+
+        <p class="lead">
+          Record 60-second video journals. We transcribe them, summarize them, and let you
+          ask your past self anything — like texting a friend who remembers every detail
+          you've forgotten.
+        </p>
+
+        <div class="cta-row">
+          <a href="/" class="btn btn-primary">
+            Start journaling free
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12h14"/><path d="m12 5 7 7-7 7"/></svg>
+          </a>
+          <a href="#how" class="btn">See how it works</a>
+        </div>
+
+        <div class="trust-row">
+          <div class="item">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M20 6 9 17l-5-5"/></svg>
+            No card required
+          </div>
+          <div class="item">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M20 6 9 17l-5-5"/></svg>
+            End-to-end private
+          </div>
+          <div class="item">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M20 6 9 17l-5-5"/></svg>
+            Export anytime
+          </div>
+        </div>
+      </div>
+
+      <!-- Phone Mockup -->
+      <div class="phone-stage">
+        <div class="anno tl">
+          <span class="ac-dot" style="background: var(--orange);"></span>
+          <div>
+            Streak tracker
+            <div class="anno-line">live across the app</div>
+          </div>
+        </div>
+        <div class="anno tr">
+          <span class="ac-dot" style="background: var(--blue);"></span>
+          <div>
+            Auto-transcribed
+            <div class="anno-line">Whisper + GPT</div>
+          </div>
+        </div>
+        <div class="anno bl">
+          <span class="ac-dot" style="background: var(--purple);"></span>
+          <div>
+            Built-in chatbot
+            <div class="anno-line">your second brain</div>
+          </div>
+        </div>
+
+        <div class="phone">
+          <div class="phone-screen">
+            <div class="notch"></div>
+
+            <div class="phone-section-title">Calendar</div>
+
+            <div class="cal-card">
+              <div class="cal-top">
+                <div>
+                  <div class="l-label">This month</div>
+                  <div class="l-month">December</div>
+                </div>
+                <div>
+                  <div class="r-today">Today</div>
+                  <div class="r-date">22</div>
+                  <div class="r-chev">›</div>
+                </div>
+              </div>
+
+              <div class="cal-meta">
+                <span>December</span>
+                <span>2025</span>
+              </div>
+
+              <div class="cal-grid">
+                <div class="cal-dow">S</div><div class="cal-dow">M</div><div class="cal-dow">T</div><div class="cal-dow">W</div><div class="cal-dow">T</div><div class="cal-dow">F</div><div class="cal-dow">S</div>
+
+                <div class="cal-day empty">.</div>
+                <div class="cal-day">1<span class="dot"></span></div>
+                <div class="cal-day">2</div>
+                <div class="cal-day">3<span class="dot"></span></div>
+                <div class="cal-day">4</div>
+                <div class="cal-day">5</div>
+                <div class="cal-day">6<span class="dot"></span></div>
+
+                <div class="cal-day">7</div>
+                <div class="cal-day">8</div>
+                <div class="cal-day">9</div>
+                <div class="cal-day">10<span class="dot"></span></div>
+                <div class="cal-day">11</div>
+                <div class="cal-day">12</div>
+                <div class="cal-day">13</div>
+
+                <div class="cal-day">14</div>
+                <div class="cal-day">15</div>
+                <div class="cal-day">16</div>
+                <div class="cal-day">17</div>
+                <div class="cal-day">18</div>
+                <div class="cal-day">19</div>
+                <div class="cal-day">20</div>
+
+                <div class="cal-day">21</div>
+                <div class="cal-day today">22</div>
+                <div class="cal-day">23</div>
+                <div class="cal-day">24</div>
+                <div class="cal-day">25</div>
+                <div class="cal-day">26</div>
+                <div class="cal-day">27</div>
+
+                <div class="cal-day">28</div>
+                <div class="cal-day">29</div>
+                <div class="cal-day">30</div>
+                <div class="cal-day">31</div>
+              </div>
+            </div>
+
+            <div class="phone-section-title" style="margin-top: 22px;">Dashboard</div>
+
+            <div class="dash-card">
+              <div class="dash-icon-wrap">🔥</div>
+              <div class="dash-text">
+                <div class="dash-label">Stats</div>
+                <div class="dash-value">Streak 12</div>
+              </div>
+              <div class="dash-right">
+                <div class="r-top">Dec 22</div>
+                <div class="bars">
+                  <span style="height: 30%;"></span>
+                  <span style="height: 55%;"></span>
+                  <span class="peak orange" style="height: 100%;"></span>
+                  <span style="height: 60%;"></span>
+                  <span style="height: 40%;"></span>
+                </div>
+                <div class="r-link">Tap to open ›</div>
+              </div>
+            </div>
+
+            <div class="dash-card">
+              <div class="dash-icon-wrap">⏱️</div>
+              <div class="dash-text">
+                <div class="dash-label">Journal duration</div>
+                <div class="dash-value">3:22</div>
+              </div>
+              <div class="dash-right">
+                <div class="r-top">Today</div>
+                <div class="bars">
+                  <span style="height: 50%;"></span>
+                  <span style="height: 30%;"></span>
+                  <span class="peak purple" style="height: 90%;"></span>
+                  <span style="height: 60%;"></span>
+                  <span style="height: 75%;"></span>
+                </div>
+                <div class="r-sub">Avg 2 min (7d)</div>
+              </div>
+            </div>
+
+            <div class="dash-card">
+              <div class="dash-icon-wrap">⚙️</div>
+              <div class="dash-text">
+                <div class="dash-label">Automations</div>
+                <div class="dash-value">2 active</div>
+              </div>
+              <div class="dash-right">
+                <div class="r-link">Integrations</div>
+                <div class="r-link">Manage ›</div>
+              </div>
+            </div>
+
+            <div class="create-fab">
+              <span class="ic">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12h14"/><path d="M12 5v14"/></svg>
+              </span>
+              Create
+            </div>
+
+            <div class="tab-bar">
+              <div class="tab-item active">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="3" width="7" height="7" rx="1"/><rect x="14" y="3" width="7" height="7" rx="1"/><rect x="3" y="14" width="7" height="7" rx="1"/><rect x="14" y="14" width="7" height="7" rx="1"/></svg>
+                Dashboard
+              </div>
+              <div class="tab-item">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="6" cy="6" r="3"/><circle cx="18" cy="18" r="3"/><path d="M8.5 8.5 15.5 15.5"/></svg>
+                Integrations
+              </div>
+              <div class="tab-item">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="4" y="8" width="16" height="12" rx="2"/><path d="M12 4v4"/><circle cx="10" cy="14" r="1"/><circle cx="14" cy="14" r="1"/></svg>
+                Chat bot
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ============== LOGO STRIP ============== -->
+<div class="logo-strip">
+  <div class="wrap">
+    <div class="lbl">Powered by best-in-class AI</div>
+    <div class="row">
+      <span class="it">⚡ OpenAI Whisper</span>
+      <span class="it">✦ GPT-4</span>
+      <span class="it">⚙ FastAPI</span>
+      <span class="it">⬢ MongoDB</span>
+      <span class="it">▲ React</span>
+    </div>
+  </div>
+</div>
+
+<!-- ============== FEATURES ============== -->
+<section class="section-pad" id="features">
+  <div class="wrap">
+    <div class="section-head">
+      <div class="label">02 — Features</div>
+      <h2>Built for the moments<br />you'd otherwise forget.</h2>
+      <p>Six tools that quietly do the work in the background, so you can just talk and trust that future-you will be able to find it.</p>
+    </div>
+
+    <div class="feature-grid">
+
+      <div class="feature wide">
+        <span class="num">F.01</span>
+        <div class="icon orange">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round"><rect x="2" y="6" width="14" height="12" rx="2"/><path d="m22 8-6 4 6 4V8Z"/></svg>
+        </div>
+        <h3>Record. Don't perform.</h3>
+        <p>One tap, point at your face, talk for a minute. No edits, no audience. Your entries live in a private feed only you ever see.</p>
+        <div class="chips">
+          <span class="chip">15s — 5min</span>
+          <span class="chip">Private by default</span>
+          <span class="chip">Upload or record</span>
+        </div>
+      </div>
+
+      <div class="feature tall">
+        <span class="num">F.02</span>
+        <div class="icon blue">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round"><path d="M14 3v4a1 1 0 0 0 1 1h4"/><path d="M17 21H7a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h7l5 5v11a2 2 0 0 1-2 2Z"/><path d="M9 13h6"/><path d="M9 17h6"/></svg>
+        </div>
+        <h3>Auto-transcribed.<br />Auto-summarized.</h3>
+        <p>Whisper turns speech into searchable text. GPT distills it into a one-line summary the moment you stop recording. Both happen in seconds.</p>
+      </div>
+
+      <div class="feature third">
+        <span class="num">F.03</span>
+        <div class="icon purple">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round"><path d="M12 8V4H8"/><rect width="16" height="12" x="4" y="8" rx="2"/><path d="M2 14h2"/><path d="M20 14h2"/><path d="M15 13v2"/><path d="M9 13v2"/></svg>
+        </div>
+        <h3>A chatbot that actually knows you.</h3>
+        <p>Ask your second brain anything. It cites your real entries.</p>
+        <div class="chat-preview">
+          <div class="bubble user">When did I last mention burnout?</div>
+          <div class="bubble ai">Three times this month — most recently Tuesday after the Q2 review.</div>
+        </div>
+      </div>
+
+      <div class="feature third">
+        <span class="num">F.04</span>
+        <div class="icon orange">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round"><path d="M8.5 14.5A2.5 2.5 0 0 0 11 12c0-1.38-.5-2-1-3-1.072-2.143-.224-4.054 2-6 .5 2.5 2 4.9 4 6.5 2 1.6 3 3.5 3 5.5a7 7 0 1 1-14 0c0-1.153.433-2.294 1-3a2.5 2.5 0 0 0 2.5 2.5z"/></svg>
+        </div>
+        <h3>Streaks, not stress.</h3>
+        <p>Daily, weekly, monthly, yearly highlights. Trend lines. The shape of your life, charted.</p>
+        <div class="mini-bars">
+          <span style="height: 30%"></span>
+          <span style="height: 55%"></span>
+          <span style="height: 40%"></span>
+          <span style="height: 75%"></span>
+          <span style="height: 60%"></span>
+          <span style="height: 90%" class="hot"></span>
+          <span style="height: 70%"></span>
+          <span style="height: 45%"></span>
+          <span style="height: 80%"></span>
+          <span style="height: 65%"></span>
+        </div>
+      </div>
+
+      <div class="feature third">
+        <span class="num">F.05</span>
+        <div class="icon green">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="4" width="18" height="18" rx="2"/><path d="M16 2v4"/><path d="M8 2v4"/><path d="M3 10h18"/></svg>
+        </div>
+        <h3>A calendar that remembers.</h3>
+        <p>Every date is a portal back to who you were that day.</p>
+        <div class="mini-cal">
+          <div class="d"></div><div class="d on"></div><div class="d on"></div><div class="d med"></div><div class="d on"></div><div class="d"></div><div class="d on"></div>
+          <div class="d on"></div><div class="d med"></div><div class="d on"></div><div class="d on"></div><div class="d"></div><div class="d on"></div><div class="d on"></div>
+          <div class="d on"></div><div class="d med"></div><div class="d on"></div><div class="d"></div><div class="d on"></div><div class="d on"></div><div class="d on"></div>
+          <div class="d med"></div><div class="d on"></div><div class="d on"></div><div class="d on"></div><div class="d on"></div><div class="d med"></div><div class="d on"></div>
+        </div>
+      </div>
+
+      <div class="feature wide">
+        <span class="num">F.06</span>
+        <div class="icon pink">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round"><path d="M14 14V8a2 2 0 0 0-2-2H4"/><path d="m17 11 3 3-3 3"/><path d="M20 14H4"/></svg>
+        </div>
+        <h3>Hooks &amp; automations.</h3>
+        <p>Pipe entries into Notion, Obsidian, your therapist's inbox — your call. Webhooks, fully scriptable. Two automations come free, build as many as you need.</p>
+        <div class="chips">
+          <span class="chip">Webhooks</span>
+          <span class="chip">Notion</span>
+          <span class="chip">Slack</span>
+          <span class="chip">Custom scripts</span>
+          <span class="chip">Email digest</span>
+        </div>
+      </div>
+
+    </div>
+  </div>
+</section>
+
+<!-- ============== HOW IT WORKS ============== -->
+<section class="section-pad" id="how">
+  <div class="wrap">
+    <div class="section-head">
+      <div class="label">03 — How it works</div>
+      <h2>Three steps, then<br />it's just habit.</h2>
+      <p>From raw footage to recallable memory, automatically. No editing. No tagging. No friction.</p>
+    </div>
+
+    <div class="steps">
+
+      <div class="step">
+        <div class="step-num">01</div>
+        <h4>Press the orange button. Talk.</h4>
+        <p>Vent, plan, recap, dream out loud. We don't care what it is — we care that it's there.</p>
+        <div class="step-visual"><div class="vis-rec"></div></div>
+      </div>
+
+      <div class="step">
+        <div class="step-num">02</div>
+        <h4>We do the boring part.</h4>
+        <p>Audio extracted, transcribed by Whisper, summarized by GPT, indexed in seconds.</p>
+        <div class="step-visual">
+          <div class="vis-wave">
+            <span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span>
+          </div>
+        </div>
+      </div>
+
+      <div class="step">
+        <div class="step-num">03</div>
+        <h4>Ask. Any time.</h4>
+        <p>"What was I worried about in March?" The chatbot pulls receipts from your own words.</p>
+        <div class="step-visual">
+          <div class="vis-chat">
+            <div class="q">what did I commit to?</div>
+            <div class="a">call mom — tuesday.</div>
+          </div>
+        </div>
+      </div>
+
+    </div>
+  </div>
+</section>
+
+<!-- ============== STATS ============== -->
+<section class="section-pad" id="stats">
+  <div class="wrap">
+    <div class="section-head">
+      <div class="label">04 — The numbers</div>
+      <h2>The shape of your year,<br />drawn by you.</h2>
+      <p>Trends, totals, and the long arc of you — broken down by day, week, month, and year. No vanity metrics, just patterns worth knowing.</p>
+    </div>
+
+    <div class="stats-grid">
+
+      <div class="stat-card">
+        <div class="s-label">Total time recorded · 2025</div>
+        <div class="s-value grad">14<span class="unit">hrs</span></div>
+        <p class="s-sub">Across 187 entries this year. Roughly two work days of your own voice, indexed and waiting.</p>
+        <div class="big-bars">
+          <span style="height: 30%"></span>
+          <span style="height: 55%"></span>
+          <span style="height: 40%"></span>
+          <span style="height: 75%"></span>
+          <span style="height: 60%"></span>
+          <span style="height: 90%"></span>
+          <span style="height: 70%"></span>
+          <span style="height: 45%"></span>
+          <span style="height: 80%"></span>
+          <span style="height: 65%"></span>
+          <span style="height: 50%"></span>
+          <span style="height: 95%"></span>
+          <span style="height: 75%"></span>
+          <span style="height: 60%"></span>
+          <span style="height: 85%"></span>
+        </div>
+      </div>
+
+      <div class="stat-card">
+        <div class="s-label">Current streak</div>
+        <div class="s-value">12<span class="unit">days</span></div>
+        <p class="s-sub">Longest yet was 28 days, in late February. Push past it.</p>
+        <div class="grid-cal-14">
+          <div class="d on"></div><div class="d on"></div><div class="d med"></div><div class="d on"></div><div class="d"></div><div class="d on"></div><div class="d on"></div>
+          <div class="d med"></div><div class="d on"></div><div class="d on"></div><div class="d"></div><div class="d on"></div><div class="d on"></div><div class="d on"></div>
+        </div>
+      </div>
+
+      <div class="stat-card">
+        <div class="s-label">Median entry length</div>
+        <div class="s-value">1:47</div>
+        <p class="s-sub">Long enough to say something true. Short enough to actually do tomorrow.</p>
+        <div style="margin-top: 22px; display: flex; gap: 4px; align-items: flex-end; height: 68px;">
+          <span style="flex:1;background:var(--text-4);border-radius:3px;height:25%"></span>
+          <span style="flex:1;background:var(--text-4);border-radius:3px;height:50%"></span>
+          <span style="flex:1;background:var(--purple);border-radius:3px;height:90%"></span>
+          <span style="flex:1;background:var(--text-4);border-radius:3px;height:60%"></span>
+          <span style="flex:1;background:var(--text-4);border-radius:3px;height:35%"></span>
+          <span style="flex:1;background:var(--text-4);border-radius:3px;height:75%"></span>
+          <span style="flex:1;background:var(--text-4);border-radius:3px;height:45%"></span>
+        </div>
+      </div>
+
+    </div>
+  </div>
+</section>
+
+<!-- ============== QUOTE ============== -->
+<section class="quote-section">
+  <div class="wrap">
+    <p class="pull-quote">
+      "I forgot I'd already <span class="acc">solved this problem</span> in November. My past self had the answer. I just had to ask him."
+    </p>
+    <p class="quote-attr">— beta tester · march 2026</p>
+  </div>
+</section>
+
+<!-- ============== FINAL CTA ============== -->
+<section id="cta">
+  <div class="wrap">
+    <div class="final-cta">
+      <h2>
+        Press record.<br />
+        <span class="grad">Future-you will thank you.</span>
+      </h2>
+      <p>
+        Free while we're in beta. No card. Your data is yours — export in any format, anytime.
+      </p>
+      <div style="display:flex; gap:10px; justify-content:center; flex-wrap:wrap;">
+        <a href="/" class="btn btn-primary">
+          Start your first take
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12h14"/><path d="m12 5 7 7-7 7"/></svg>
+        </a>
+        <a href="#" class="btn">Read the docs</a>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ============== FOOTER ============== -->
+<footer>
+  <div class="wrap footer-inner">
+    <div>© 2026 Video Journal Tracker · built by Ravi K.</div>
+    <div class="links">
+      <a href="#">GitHub</a>
+      <a href="#">API Docs</a>
+      <a href="#">Privacy</a>
+      <a href="#">Contact</a>
+    </div>
+  </div>
+</footer>
+
+<script>
+  const obs = new IntersectionObserver((entries) => {
+    entries.forEach(e => {
+      if (e.isIntersecting) {
+        e.target.classList.add('in');
+        obs.unobserve(e.target);
+      }
+    });
+  }, { threshold: 0.12 });
+
+  document.querySelectorAll('.feature, .step, .stat-card, .pull-quote, .section-head h2').forEach((el, i) => {
+    el.classList.add('reveal');
+    el.style.transitionDelay = (i % 4) * 80 + 'ms';
+    obs.observe(el);
+  });
+</script>
+
+</body>
+</html>
