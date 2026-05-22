@@ -1,9 +1,8 @@
 python-dotenv
-openai
-requests
 mutagen
 fastapi
 uvicorn[standard]
 motor
 pydantic
 python-multipart
+faster-whisper

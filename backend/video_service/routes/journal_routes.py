@@ -5,12 +5,12 @@ from backend.video_service.models.journal import JournalEntry
 from typing import List, Optional
 from fastapi import HTTPException
 from fastapi.responses import FileResponse
+from backend.shared.settings import MEDIA_STORAGE_ROOT
 from backend.video_service.services.database import (
     save_journal_entry,
     get_journals,
     get_journal_by_id,
 )
-import os
 
 
 
@@ -48,14 +48,13 @@ async def serve_media(user_id: str, date: str, filename: str):
     Serve media files from storage.
     Example: /media/anonymous/2025-12-17/journal_abc123.mp3
     """
-    AUDIO_STORAGE_ROOT = "backend/video_service/storage"
-    file_path = os.path.join(AUDIO_STORAGE_ROOT, user_id, date, filename)
+    file_path = MEDIA_STORAGE_ROOT / user_id / date / filename
     
-    if not os.path.exists(file_path):
+    if not file_path.exists():
         raise HTTPException(status_code=404, detail="Media file not found")
     
     # Determine content type based on file extension
-    ext = os.path.splitext(filename)[1].lower()
+    ext = file_path.suffix.lower()
     if ext == ".mp3":
         media_type = "audio/mpeg"
     elif ext == ".mp4" or ext == ".m4v":

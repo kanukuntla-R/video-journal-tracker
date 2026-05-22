@@ -1,19 +1,29 @@
-import os
-from openai import OpenAI
-from dotenv import load_dotenv
+from backend.shared.ollama import ollama_chat
+from backend.shared.settings import OLLAMA_SUMMARY_MODEL
 
-load_dotenv()
-client = OpenAI()
-# openai.api_key = os.getenv("OPENAI_API_KEY")
+SYSTEM_PROMPT = (
+    "You are a helpful assistant that summarizes personal journal entries. "
+    "Write concise, warm, practical summaries. Do not invent details."
+)
+
 
 def generate_summary(transcript: str) -> str:
-    response = client.chat.completions.create(
-        model = "gpt-3.5-turbo",
-        messages = [
-            {"role": "system", "content": "You are a helpful assistant that summarizes journal entries."},
-            {"role": "user", "content": f"Summarize this journal entry in 3 sentences:\n\n{transcript}"}
-        ],
-        temperature=0.7
-    )
-    return response.choices[0].message.content.strip()
+    clean_transcript = (transcript or "").strip()
+    if not clean_transcript:
+        return "No transcript was available to summarize."
 
+    return ollama_chat(
+        model=OLLAMA_SUMMARY_MODEL,
+        temperature=0.4,
+        messages=[
+            {"role": "system", "content": SYSTEM_PROMPT},
+            {
+                "role": "user",
+                "content": (
+                    "Summarize this journal entry in exactly 3 short sentences. "
+                    "Mention the main activities, mood, and any useful next step if present.\n\n"
+                    f"{clean_transcript}"
+                ),
+            },
+        ],
+    )

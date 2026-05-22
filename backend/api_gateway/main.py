@@ -5,22 +5,13 @@ from fastapi.middleware.cors import CORSMiddleware
 from backend.video_service.routes import journal_routes, transcribe_routes
 from backend.chatbot_service.routes.chat_routes import router as chat_router
 from backend.stats_service.routes import stats_routes
+from backend.shared.settings import APP_NAME, CORS_ORIGINS
 
-app = FastAPI()
-
-origins = [
-    "http://localhost:3000",
-    "http://localhost:5173",
-    "http://127.0.0.1:5173",
-    "http://127.0.0.1:8000",
-    "http://192.168.0.20:5173",
-    "http://10.155.225.19:5173",
-    "http://10.155.145.218:5173",
-]
+app = FastAPI(title=APP_NAME)
 
 app.add_middleware(
     CORSMiddleware,
-    allow_origins=origins,
+    allow_origins=CORS_ORIGINS,
     allow_credentials=True,
     allow_methods=["*"],
     allow_headers=["*"],

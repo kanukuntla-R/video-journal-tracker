@@ -1,36 +1,46 @@
-from dotenv import load_dotenv
-from mutagen.mp3 import MP3 
-import os
-import requests
+from functools import lru_cache
+from typing import Optional
 
-load_dotenv()
-OPENAI_API_KEY = os.getenv("OPENAI_API_KEY")
+from faster_whisper import WhisperModel
+from mutagen import File as MutagenFile
+
+from backend.shared.settings import (
+    WHISPER_COMPUTE_TYPE,
+    WHISPER_DEVICE,
+    WHISPER_LANGUAGE,
+    WHISPER_MODEL_SIZE,
+)
+
+
+@lru_cache(maxsize=1)
+def _get_model() -> WhisperModel:
+    return WhisperModel(
+        WHISPER_MODEL_SIZE,
+        device=WHISPER_DEVICE,
+        compute_type=WHISPER_COMPUTE_TYPE,
+    )
 
 
 def transcribe_audio(file_path: str) -> str:
-    with open(file_path, "rb") as audio_file:
-        response = requests.post(
-
-            "https://api.openai.com/v1/audio/transcriptions",
-            headers = {
-                "Authorization" : f"Bearer {OPENAI_API_KEY}"
-
-            },
-            files = {
-                "file" : (file_path,audio_file,"audio/mp3")
-            },
-            data = {
-
-                "model" : "whisper-1"
-            }
+    """
+    Transcribe media locally with faster-whisper instead of sending audio to a paid API.
+    The model is loaded once per process and reused for future requests.
+    """
+    try:
+        segments, _info = _get_model().transcribe(
+            file_path,
+            beam_size=5,
+            language=WHISPER_LANGUAGE,
         )
-
-    if response.status_code == 200 :
-        return response.json()["text"]
-    else:
-        print("Error", response.text)
+        transcript = " ".join(segment.text.strip() for segment in segments).strip()
+        return transcript or "Transcription failed: no speech detected"
+    except Exception as exc:
+        print(f"Transcription error: {exc}")
         return "Transcription Failed "
 
+
 def get_audio_duration(file_path: str) -> int:
-    audio = MP3(file_path)
-    return int(audio.info.length)
+    audio: Optional[object] = MutagenFile(file_path)
+    if audio is None or not getattr(audio, "info", None):
+        return 0
+    return int(getattr(audio.info, "length", 0) or 0)
