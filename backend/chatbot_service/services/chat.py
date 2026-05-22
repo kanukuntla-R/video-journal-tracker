@@ -1,12 +1,9 @@
 # backend/chatbot_service/services/chat.py
 from typing import Any, Dict, List, Optional
-from dotenv import load_dotenv
-from openai import OpenAI
 
 from backend.shared.journals_repo import find_journals
-
-load_dotenv()
-client = OpenAI()
+from backend.shared.ollama import ollama_chat
+from backend.shared.settings import OLLAMA_CHAT_MODEL
 
 SYSTEM_PROMPT = """You are a helpful “Second Brain” assistant for a video journal app.
 - Be concise and practical.
@@ -56,9 +53,8 @@ async def generate_chat_reply(
 
     msgs.append({"role": "user", "content": message})
 
-    resp = client.chat.completions.create(
-        model="gpt-3.5-turbo",
+    return ollama_chat(
+        model=OLLAMA_CHAT_MODEL,
         messages=msgs,
         temperature=0.4,
     )
-    return resp.choices[0].message.content.strip()

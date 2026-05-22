@@ -1,0 +1,460 @@
+{
+  "nodes": [
+    {
+      "id": "backend/shared/journals_repo.py",
+      "type": "file",
+      "language": "python",
+      "path": "backend/shared/journals_repo.py",
+      "name": "journals_repo.py",
+      "purpose": "Database repository layer for journal operations",
+      "description": "Provides async database operations for journal documents including insert, find, and find by ID operations using MongoDB collections",
+      "size": 26,
+      "layer": "data_access"
+    },
+    {
+      "id": "backend/shared/journals_repo.py::_journal_collection",
+      "type": "function",
+      "language": "python",
+      "path": "backend/shared/journals_repo.py",
+      "name": "_journal_collection",
+      "purpose": "Get journal MongoDB collection",
+      "description": "Private helper function that returns the journal collection from the database",
+      "signature": "_journal_collection() -> Collection",
+      "visibility": "private"
+    },
+    {
+      "id": "backend/shared/journals_repo.py::insert_journal",
+      "type": "function",
+      "language": "python",
+      "path": "backend/shared/journals_repo.py",
+      "name": "insert_journal",
+      "purpose": "Insert a new journal document",
+      "description": "Inserts a journal document into the database and returns the inserted document ID as a string",
+      "signature": "async insert_journal(doc: Dict[str, Any]) -> str",
+      "visibility": "public"
+    },
+    {
+      "id": "backend/shared/journals_repo.py::find_journals",
+      "type": "function",
+      "language": "python",
+      "path": "backend/shared/journals_repo.py",
+      "name": "find_journals",
+      "purpose": "Find multiple journal documents",
+      "description": "Finds journal documents based on query parameters, sorted by created_at descending with limit",
+      "signature": "async find_journals(query: Optional[Dict[str, Any]] = None, limit: int = 50) -> List[Dict[str, Any]]",
+      "visibility": "public"
+    },
+    {
+      "id": "backend/shared/journals_repo.py::find_journal_by_id",
+      "type": "function",
+      "language": "python",
+      "path": "backend/shared/journals_repo.py",
+      "name": "find_journal_by_id",
+      "purpose": "Find a single journal by ID",
+      "description": "Finds a single journal document by its ObjectId, with error handling for invalid IDs",
+      "signature": "async find_journal_by_id(journal_id: str) -> Optional[Dict[str, Any]]",
+      "visibility": "public"
+    },
+    {
+      "id": "backend/shared/mongo.py",
+      "type": "file",
+      "language": "python",
+      "path": "backend/shared/mongo.py",
+      "name": "mongo.py",
+      "purpose": "MongoDB database connection configuration",
+      "description": "Sets up MongoDB connection using motor async client and provides database instance for the video journal application",
+      "size": 13,
+      "layer": "data_access"
+    },
+    {
+      "id": "backend/shared/mongo.py::get_db",
+      "type": "function",
+      "language": "python",
+      "path": "backend/shared/mongo.py",
+      "name": "get_db",
+      "purpose": "Get database instance",
+      "description": "Returns the video_journal_db database instance",
+      "signature": "get_db() -> Database",
+      "visibility": "public"
+    },
+    {
+      "id": "backend/shared/mongo.py::_client",
+      "type": "variable",
+      "language": "python",
+      "path": "backend/shared/mongo.py",
+      "name": "_client",
+      "purpose": "MongoDB async client instance",
+      "description": "Private AsyncIOMotorClient instance for database connections",
+      "visibility": "private"
+    },
+    {
+      "id": "backend/shared/mongo.py::_db",
+      "type": "variable",
+      "language": "python",
+      "path": "backend/shared/mongo.py",
+      "name": "_db",
+      "purpose": "Database instance",
+      "description": "Video journal database instance from MongoDB client",
+      "visibility": "private"
+    },
+    {
+      "id": "backend/stats_service/main.py",
+      "type": "file",
+      "language": "python",
+      "path": "backend/stats_service/main.py",
+      "name": "main.py",
+      "purpose": "Statistics service FastAPI application entry point",
+      "description": "Main FastAPI application for the statistics service, includes health check and stats routes",
+      "size": 10,
+      "layer": "service"
+    },
+    {
+      "id": "backend/stats_service/main.py::app",
+      "type": "variable",
+      "language": "python",
+      "path": "backend/stats_service/main.py",
+      "name": "app",
+      "purpose": "FastAPI application instance",
+      "description": "Main FastAPI application instance for the statistics service",
+      "visibility": "public"
+    },
+    {
+      "id": "backend/stats_service/main.py::health",
+      "type": "function",
+      "language": "python",
+      "path": "backend/stats_service/main.py",
+      "name": "health",
+      "purpose": "Health check endpoint",
+      "description": "Returns health status for the statistics service",
+      "signature": "async health() -> dict",
+      "visibility": "public"
+    },
+    {
+      "id": "backend/stats_service/models/stats.py",
+      "type": "file",
+      "language": "python",
+      "path": "backend/stats_service/models/stats.py",
+      "name": "stats.py",
+      "purpose": "Statistics data models",
+      "description": "Pydantic models for statistics data including daily stats and summary statistics",
+      "size": 19,
+      "layer": "model"
+    },
+    {
+      "id": "backend/stats_service/models/stats.py::DailyStat",
+      "type": "class",
+      "language": "python",
+      "path": "backend/stats_service/models/stats.py",
+      "name": "DailyStat",
+      "purpose": "Daily statistics data model",
+      "description": "Pydantic model representing daily statistics with date, entry count, and total duration",
+      "visibility": "public"
+    },
+    {
+      "id": "backend/stats_service/models/stats.py::StatsSummary",
+      "type": "class",
+      "language": "python",
+      "path": "backend/stats_service/models/stats.py",
+      "name": "StatsSummary",
+      "purpose": "Statistics summary data model",
+      "description": "Pydantic model for comprehensive statistics summary including totals, averages, and daily breakdown",
+      "visibility": "public"
+    },
+    {
+      "id": "backend/stats_service/routes/stats_routes.py",
+      "type": "file",
+      "language": "python",
+      "path": "backend/stats_service/routes/stats_routes.py",
+      "name": "stats_routes.py",
+      "purpose": "Statistics API route handlers",
+      "description": "FastAPI router with endpoints for statistics summary and daily statistics with filtering options",
+      "size": 36,
+      "layer": "api"
+    },
+    {
+      "id": "backend/stats_service/routes/stats_routes.py::router",
+      "type": "variable",
+      "language": "python",
+      "path": "backend/stats_service/routes/stats_routes.py",
+      "name": "router",
+      "purpose": "FastAPI router for stats endpoints",
+      "description": "APIRouter instance with /stats prefix and stats tag for organizing statistics endpoints",
+      "visibility": "public"
+    },
+    {
+      "id": "backend/stats_service/routes/stats_routes.py::stats_summary",
+      "type": "function",
+      "language": "python",
+      "path": "backend/stats_service/routes/stats_routes.py",
+      "name": "stats_summary",
+      "purpose": "Statistics summary API endpoint",
+      "description": "GET endpoint that returns comprehensive statistics summary with optional filtering by user_id and date range",
+      "signature": "async stats_summary(user_id: Optional[str] = None, start_date: Optional[str] = None, end_date: Optional[str] = None) -> StatsSummary",
+      "visibility": "public"
+    },
+    {
+      "id": "backend/stats_service/routes/stats_routes.py::stats_daily",
+      "type": "function",
+      "language": "python",
+      "path": "backend/stats_service/routes/stats_routes.py",
+      "name": "stats_daily",
+      "purpose": "Daily statistics API endpoint",
+      "description": "GET endpoint that returns daily statistics breakdown with optional filtering by user_id and date range",
+      "signature": "async stats_daily(user_id: Optional[str] = None, start_date: Optional[str] = None, end_date: Optional[str] = None) -> List[DailyStat]",
+      "visibility": "public"
+    },
+    {
+      "id": "backend/stats_service/services/stats.py",
+      "type": "file",
+      "language": "python",
+      "path": "backend/stats_service/services/stats.py",
+      "name": "stats.py",
+      "purpose": "Statistics business logic service",
+      "description": "Service layer providing statistics calculations and aggregations using MongoDB queries with filtering and grouping",
+      "size": 92,
+      "layer": "service"
+    },
+    {
+      "id": "backend/stats_service/services/stats.py::_match",
+      "type": "function",
+      "language": "python",
+      "path": "backend/stats_service/services/stats.py",
+      "name": "_match",
+      "purpose": "Build MongoDB match query",
+      "description": "Private helper function that constructs MongoDB match conditions for user_id and date range filtering",
+      "signature": "_match(user_id: Optional[str], start_date: Optional[str], end_date: Optional[str]) -> Dict[str, Any]",
+      "visibility": "private"
+    },
+    {
+      "id": "backend/stats_service/services/stats.py::get_stats_summary",
+      "type": "function",
+      "language": "python",
+      "path": "backend/stats_service/services/stats.py",
+      "name": "get_stats_summary",
+      "purpose": "Calculate statistics summary",
+      "description": "Aggregates journal data to calculate total entries, duration, averages, and first/last entry dates",
+      "signature": "async get_stats_summary(user_id: Optional[str], start_date: Optional[str], end_date: Optional[str]) -> Dict[str, Any]",
+      "visibility": "public"
+    },
+    {
+      "id": "backend/stats_service/services/stats.py::get_daily_stats",
+      "type": "function",
+      "language": "python",
+      "path": "backend/stats_service/services/stats.py",
+      "name": "get_daily_stats",
+      "purpose": "Calculate daily statistics",
+      "description": "Aggregates journal data by day to calculate daily entry counts and total durations",
+      "signature": "async get_daily_stats(user_id: Optional[str], start_date: Optional[str], end_date: Optional[str]) -> List[Dict[str, Any]]",
+      "visibility": "public"
+    },
+    {
+      "id": "backend/video_service/__init__.py",
+      "type": "file",
+      "language": "python",
+      "path": "backend/video_service/__init__.py",
+      "name": "__init__.py",
+      "purpose": "Video service package marker",
+      "description": "Empty Python package initialization file for the video service module",
+      "size": 0,
+      "layer": "service"
+    },
+    {
+      "id": "backend/video_service/main.py",
+      "type": "file",
+      "language": "python",
+      "path": "backend/video_service/main.py",
+      "name": "main.py",
+      "purpose": "Video service FastAPI application entry point",
+      "description": "Main FastAPI application for the video service with CORS configuration, health check, and video/transcription routes",
+      "size": 35,
+      "layer": "service"
+    },
+    {
+      "id": "backend/video_service/main.py::app",
+      "type": "variable",
+      "language": "python",
+      "path": "backend/video_service/main.py",
+      "name": "app",
+      "purpose": "FastAPI application instance",
+      "description": "Main FastAPI application instance for the video service with CORS middleware",
+      "visibility": "public"
+    },
+    {
+      "id": "backend/video_service/main.py::origins",
+      "type": "variable",
+      "language": "python",
+      "path": "backend/video_service/main.py",
+      "name": "origins",
+      "purpose": "CORS allowed origins list",
+      "description": "List of allowed origins for CORS including localhost and LAN IP addresses for development",
+      "visibility": "private"
+    },
+    {
+      "id": "backend/video_service/main.py::health_check",
+      "type": "function",
+      "language": "python",
+      "path": "backend/video_service/main.py",
+      "name": "health_check",
+      "purpose": "Health check endpoint",
+      "description": "Returns health status for the video service",
+      "signature": "async health_check() -> dict",
+      "visibility": "public"
+    }
+  ],
+  "edges": [
+    {
+      "source": "backend/shared/journals_repo.py",
+      "target": "backend/shared/mongo.py",
+      "type": "imports",
+      "label": "imports get_db",
+      "description": "journals_repo imports get_db function from mongo module for database access"
+    },
+    {
+      "source": "backend/shared/journals_repo.py::_journal_collection",
+      "target": "backend/shared/mongo.py::get_db",
+      "type": "calls",
+      "label": "calls get_db",
+      "description": "_journal_collection function calls get_db to access the journal collection"
+    },
+    {
+      "source": "backend/shared/journals_repo.py::insert_journal",
+      "target": "backend/shared/journals_repo.py::_journal_collection",
+      "type": "calls",
+      "label": "uses collection",
+      "description": "insert_journal calls _journal_collection to get the collection for insert operation"
+    },
+    {
+      "source": "backend/shared/journals_repo.py::find_journals",
+      "target": "backend/shared/journals_repo.py::_journal_collection",
+      "type": "calls",
+      "label": "uses collection",
+      "description": "find_journals calls _journal_collection to get the collection for find operation"
+    },
+    {
+      "source": "backend/shared/journals_repo.py::find_journal_by_id",
+      "target": "backend/shared/journals_repo.py::_journal_collection",
+      "type": "calls",
+      "label": "uses collection",
+      "description": "find_journal_by_id calls _journal_collection to get the collection for find_one operation"
+    },
+    {
+      "source": "backend/shared/mongo.py::get_db",
+      "target": "backend/shared/mongo.py::_db",
+      "type": "returns",
+      "label": "returns database",
+      "description": "get_db function returns the _db database instance"
+    },
+    {
+      "source": "backend/shared/mongo.py::_db",
+      "target": "backend/shared/mongo.py::_client",
+      "type": "derived_from",
+      "label": "derived from client",
+      "description": "_db is derived from _client by accessing the video_journal_db database"
+    },
+    {
+      "source": "backend/stats_service/main.py",
+      "target": "backend/stats_service/routes/stats_routes.py",
+      "type": "imports",
+      "label": "imports router",
+      "description": "main.py imports stats_routes module to include the router"
+    },
+    {
+      "source": "backend/stats_service/main.py::app",
+      "target": "backend/stats_service/routes/stats_routes.py::router",
+      "type": "includes",
+      "label": "includes router",
+      "description": "FastAPI app includes the stats router for handling statistics endpoints"
+    },
+    {
+      "source": "backend/stats_service/routes/stats_routes.py",
+      "target": "backend/stats_service/services/stats.py",
+      "type": "imports",
+      "label": "imports services",
+      "description": "stats_routes imports get_stats_summary and get_daily_stats from stats service"
+    },
+    {
+      "source": "backend/stats_service/routes/stats_routes.py",
+      "target": "backend/stats_service/models/stats.py",
+      "type": "imports",
+      "label": "imports models",
+      "description": "stats_routes imports StatsSummary and DailyStat models for response typing"
+    },
+    {
+      "source": "backend/stats_service/routes/stats_routes.py::stats_summary",
+      "target": "backend/stats_service/services/stats.py::get_stats_summary",
+      "type": "calls",
+      "label": "calls service",
+      "description": "stats_summary endpoint calls get_stats_summary service function"
+    },
+    {
+      "source": "backend/stats_service/routes/stats_routes.py::stats_daily",
+      "target": "backend/stats_service/services/stats.py::get_daily_stats",
+      "type": "calls",
+      "label": "calls service",
+      "description": "stats_daily endpoint calls get_daily_stats service function"
+    },
+    {
+      "source": "backend/stats_service/services/stats.py",
+      "target": "backend/shared/mongo.py",
+      "type": "imports",
+      "label": "imports get_db",
+      "description": "stats service imports get_db function from mongo module for database access"
+    },
+    {
+      "source": "backend/stats_service/services/stats.py::get_stats_summary",
+      "target": "backend/stats_service/services/stats.py::_match",
+      "type": "calls",
+      "label": "builds query",
+      "description": "get_stats_summary calls _match helper to build MongoDB match conditions"
+    },
+    {
+      "source": "backend/stats_service/services/stats.py::get_daily_stats",
+      "target": "backend/stats_service/services/stats.py::_match",
+      "type": "calls",
+      "label": "builds query",
+      "description": "get_daily_stats calls _match helper to build MongoDB match conditions"
+    },
+    {
+      "source": "backend/stats_service/services/stats.py::get_stats_summary",
+      "target": "backend/shared/mongo.py::get_db",
+      "type": "calls",
+      "label": "accesses database",
+      "description": "get_stats_summary calls get_db to access journal collection for aggregation"
+    },
+    {
+      "source": "backend/stats_service/services/stats.py::get_daily_stats",
+      "target": "backend/shared/mongo.py::get_db",
+      "type": "calls",
+      "label": "accesses database",
+      "description": "get_daily_stats calls get_db to access journal collection for aggregation"
+    },
+    {
+      "source": "backend/video_service/main.py",
+      "target": "backend/video_service/routes/journal_routes.py",
+      "type": "imports",
+      "label": "imports journal routes",
+      "description": "main.py imports journal_routes module to include the router"
+    },
+    {
+      "source": "backend/video_service/main.py",
+      "target": "backend/video_service/routes/transcribe_routes.py",
+      "type": "imports",
+      "label": "imports transcribe routes",
+      "description": "main.py imports transcribe_routes module to include the router"
+    },
+    {
+      "source": "backend/video_service/main.py::app",
+      "target": "backend/video_service/routes/journal_routes.py",
+      "type": "includes",
+      "label": "includes journal router",
+      "description": "FastAPI app includes the journal router for handling journal-related endpoints"
+    },
+    {
+      "source": "backend/video_service/main.py::app",
+      "target": "backend/video_service/routes/transcribe_routes.py",
+      "type": "includes",
+      "label": "includes transcribe router",
+      "description": "FastAPI app includes the transcribe router for handling transcription endpoints"
+    }
+  ]
+}

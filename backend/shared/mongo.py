@@ -1,11 +1,10 @@
 # backend/shared/mongo.py
-import os
 from motor.motor_asyncio import AsyncIOMotorClient
 
-MONGO_URI = os.getenv("MONGO_URI", "mongodb://localhost:27017")
+from backend.shared.settings import MONGO_DB_NAME, MONGO_URI
 
 _client = AsyncIOMotorClient(MONGO_URI)
-_db = _client["video_journal_db"]
+_db = _client[MONGO_DB_NAME]
 
 def get_db():
     return _db

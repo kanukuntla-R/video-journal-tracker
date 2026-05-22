@@ -3,24 +3,14 @@ from backend.video_service.routes import journal_routes
 from backend.video_service.routes import transcribe_routes
 from fastapi.middleware.cors import CORSMiddleware
 
+from backend.shared.settings import APP_NAME, CORS_ORIGINS
 
 
-app = FastAPI()
-
-# Development CORS allowlist. Add your LAN IP so mobile devices can reach it.
-origins = [
-    "http://localhost:3000",
-    "http://localhost:5173",
-    "http://127.0.0.1:5173",
-    "http://127.0.0.1:8000",
-    "http://192.168.0.20:5173",
-    # Replace with your LAN IP (use `ifconfig`/`ipconfig`) so phone/tablet can call the API
-    "http://10.155.145.218:5173",
-]
+app = FastAPI(title=APP_NAME)
 
 app.add_middleware(
     CORSMiddleware,
-    allow_origins=origins,
+    allow_origins=CORS_ORIGINS,
     allow_credentials=True,
     allow_methods=["*"],
     allow_headers=["*"],
