@@ -8,6 +8,7 @@ import { motion, useAnimation } from "motion/react";
 
 // Minimal className joiner to mimic the cn helper
 const cn = (...classes) => classes.filter(Boolean).join(" ");
+const MotionLine = motion.line;
 
 /** Your Dashboard icon (same path you provided) */
 export function DashboardIcon(props) {
@@ -90,7 +91,7 @@ export const BotIcon = forwardRef(
           <path d="M2 14h2" />
           <path d="M20 14h2" />
 
-          <motion.line
+          <MotionLine
             x1={15}
             x2={15}
             initial="normal"
@@ -109,7 +110,7 @@ export const BotIcon = forwardRef(
             }}
           />
 
-          <motion.line
+          <MotionLine
             x1={9}
             x2={9}
             initial="normal"

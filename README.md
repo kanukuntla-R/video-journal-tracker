@@ -1,223 +1,251 @@
-# Video Journal Tracker
+# Video Journal Tracker (Echo Mind)
 
-A full-stack application for tracking video journal entries with transcription and summarization capabilities.
+Echo Mind is a full-stack video journaling application. Record or upload an entry, transcribe it locally with Faster Whisper, generate summaries and chat responses with Ollama, and review journal activity through calendar and statistics views.
+
+## Features
+
+- Record video or audio directly in the browser
+- Upload common audio and video formats (up to 250 MB by default)
+- Local speech-to-text transcription with Faster Whisper
+- Local AI summaries and journal-aware chat with Ollama
+- Dashboard, calendar, journal history, and activity statistics
+- Email/password and Google authentication through Supabase
+- Optional authentication bypass for local development
+- FastAPI API gateway with interactive OpenAPI documentation
+- Local and Docker-based development workflows
+
+## Tech stack
+
+- **Frontend:** React 19, Vite, React Router, Supabase JS, Day.js, Motion
+- **Backend:** Python, FastAPI, Motor, Pydantic
+- **Data:** MongoDB
+- **Media and AI:** FFmpeg, Faster Whisper, Ollama
 
 ## Prerequisites
 
-- **Node.js** (v16 or higher) and npm
-- **Python** (v3.8 or higher)
-- **MongoDB** (running locally on port 27017, or configure `MONGO_URI` environment variable)
-- **FFmpeg** (required for extracting audio from uploaded video files)
-- **Ollama** (required for local summary generation)
+- Node.js 20 or newer and npm
+- Python 3.10 or newer
+- MongoDB 7 (local install or Docker)
+- FFmpeg
+- Ollama for summaries and chat
+- A Supabase project when authentication is enabled
 
-## Backend Setup
+## Quick start
 
-1. **Navigate to the backend directory:**
-   ```bash
-   cd backend
-   ```
+Run all commands in this section from the repository root.
 
-2. **Activate the virtual environment** (if not already activated):
-   ```bash
-   # On macOS/Linux:
-   source ../venv/bin/activate
-   
-   # On Windows:
-   ..\venv\Scripts\activate
-   ```
+### 1. Configure the environment
 
-3. **Install Python dependencies:**
-   ```bash
-   pip install -r requirements.txt
-   ```
-   
-   **Note:** If you encounter missing dependencies, you may need to install:
-   ```bash
-   pip install fastapi uvicorn motor pydantic python-dotenv mutagen faster-whisper python-multipart
-   ```
+Copy the example files:
 
-4. **Set up environment variables** (optional):
-   - Create a `.env` file in the `backend` directory if needed
-   - Set `MONGO_URI` if MongoDB is not running on `localhost:27017`
-   - Optional backend settings:
-     - `APP_NAME=Video Journal Tracker`
-     - `CORS_ORIGINS=http://localhost:3000,http://localhost:5173,http://127.0.0.1:5173,http://127.0.0.1:8000`
-     - `MONGO_DB_NAME=video_journal_db`
-     - `MEDIA_STORAGE_ROOT=backend/video_service/storage`
-     - `TEMP_UPLOAD_ROOT=backend/video_service/temp`
-   - Transcription runs locally with `faster-whisper`; no OpenAI key is needed for transcription
-   - Optional transcription settings:
-     - `WHISPER_MODEL_SIZE=base` (`tiny`, `base`, `small`, `medium`, etc.)
-     - `WHISPER_DEVICE=cpu`
-     - `WHISPER_COMPUTE_TYPE=int8`
-     - `WHISPER_LANGUAGE=en` if you want to force English
-   - Summary generation and chatbot replies run locally with Ollama:
-     - Install/start Ollama
-     - Pull a local model: `ollama pull llama3.2:3b`
-     - Optional settings:
-       - `OLLAMA_BASE_URL=http://localhost:11434`
-       - `OLLAMA_SUMMARY_MODEL=llama3.2:3b`
-       - `OLLAMA_CHAT_MODEL=llama3.2:3b`
-       - `OLLAMA_TIMEOUT_SECONDS=120`
-
-5. **Start MongoDB** (if running locally):
-   ```bash
-   # On macOS with Homebrew:
-   brew services start mongodb-community
-   
-   # Or run MongoDB directly:
-   mongod
-   ```
-
-6. **Run the backend server:**
-   ```bash
-   # From the backend directory, run the video service:
-   uvicorn backend.video_service.main:app --reload --host 0.0.0.0 --port 8000
-   
-   # Or from the project root:
-   uvicorn backend.video_service.main:app --reload --host 0.0.0.0 --port 8000
-   ```
-
-   The backend API will be available at `http://127.0.0.1:8000`
-   - API docs: `http://127.0.0.1:8000/docs`
-   - Health check: `http://127.0.0.1:8000/health`
-
-## Frontend Setup
-
-1. **Navigate to the frontend directory:**
-   ```bash
-   cd frontend
-   ```
-
-2. **Install dependencies** (if not already installed):
-   ```bash
-   npm install
-   ```
-
-3. **Run the development server:**
-   ```bash
-   npm run dev
-   ```
-
-   The frontend will be available at `http://localhost:5173`
-
-4. **Optional: Configure API URL**
-   - Create a `.env` file in the `frontend` directory
-   - Add: `VITE_API_BASE_URL=http://127.0.0.1:8000`
-   - (This is the default, so only needed if you change the backend port)
-
-## Running Both Services
-
-### Option 1: Run in separate terminals
-
-**Terminal 1 - Backend:**
 ```bash
-cd backend
-source ../venv/bin/activate  # or ..\venv\Scripts\activate on Windows
-uvicorn backend.video_service.main:app --reload --host 0.0.0.0 --port 8000
+cp backend/.env.example backend/.env
+cp frontend/.env.example frontend/.env
 ```
 
-**Terminal 2 - Frontend:**
+For local development without Supabase authentication, set:
+
+```env
+# backend/.env
+AUTH_REQUIRED=false
+```
+
+```env
+# frontend/.env
+VITE_AUTH_BYPASS=true
+```
+
+The frontend environment must still contain syntactically valid Supabase URL and publishable-key values because the client is initialized at startup. Use a real Supabase project when authentication is enabled.
+
+### 2. Install dependencies
+
+macOS/Linux:
+
+```bash
+python3 -m venv venv
+source venv/bin/activate
+python -m pip install -r backend/requirements.txt
+cd frontend && npm install && cd ..
+```
+
+Windows PowerShell:
+
+```powershell
+py -m venv venv
+.\venv\Scripts\Activate.ps1
+python -m pip install -r backend\requirements.txt
+Set-Location frontend
+npm install
+Set-Location ..
+```
+
+### 3. Start supporting services
+
+Start MongoDB, then start Ollama and download the configured model:
+
+```bash
+ollama serve
+ollama pull llama3.2:3b
+```
+
+Ollama is only required for AI summaries and chat. The rest of the application can run without it.
+
+### 4. Start the backend and frontend
+
+Backend, from the repository root:
+
+```bash
+python -m uvicorn backend.api_gateway.main:app --reload --host 0.0.0.0 --port 8000
+```
+
+Frontend, in another terminal:
+
 ```bash
 cd frontend
 npm run dev
 ```
 
-## Docker Setup
+Open:
 
-The project includes a Docker Compose setup for local development:
+- App: <http://localhost:5173>
+- API documentation: <http://127.0.0.1:8000/docs>
+- Health check: <http://127.0.0.1:8000/health>
 
-- `api`: FastAPI backend/API gateway
-- `frontend`: Vite dev server
-- `mongo`: MongoDB with a persistent volume
-- `ollama`: optional local LLM service behind the `ai` profile
+## macOS development helper
 
-### Start the core stack
+The Bash helper can manage MongoDB installed through Homebrew, Ollama, the backend, and the frontend:
+
+```bash
+./vjt dev start
+./vjt dev status
+./vjt dev doctor
+./vjt logs backend
+./vjt service restart frontend
+./vjt test all
+./vjt dev stop
+```
+
+Equivalent `make` shortcuts include `make dev`, `make status`, `make test`, and `make stop`. Runtime state and logs are written under `.dev/`.
+
+## Docker
+
+Create `frontend/.env` before starting the stack, then run:
 
 ```bash
 docker compose up --build
 ```
 
-The app will be available at:
+This starts the frontend, API gateway, and MongoDB. Uploaded media, temporary files, MongoDB data, and downloaded Whisper models are stored in Docker volumes.
 
-- Frontend: `http://localhost:5173`
-- Backend/API docs: `http://localhost:8000/docs`
-- MongoDB: `localhost:27017`
-
-The Docker backend stores uploaded media, temp uploads, MongoDB data, and downloaded Whisper models in Docker volumes.
-
-### Use local Ollama from your Mac
-
-By default, the API container uses:
+To use Ollama running on the host, keep the default value:
 
 ```env
 OLLAMA_BASE_URL=http://host.docker.internal:11434
 ```
 
-So if Ollama is running on your Mac, the container can use it for summaries and chat:
-
-```bash
-ollama serve
-ollama pull llama3.2:3b
-docker compose up --build
-```
-
-### Use Ollama as a Docker service
-
-If you want Ollama containerized too:
+To run Ollama inside Docker instead:
 
 ```bash
 OLLAMA_BASE_URL=http://ollama:11434 docker compose --profile ai up --build
-```
-
-Then pull the model inside the Ollama container:
-
-```bash
 docker compose exec ollama ollama pull llama3.2:3b
 ```
 
-### Stop Docker services
+Stop the stack with:
 
 ```bash
 docker compose down
 ```
 
-To also delete Docker volumes:
+Use `docker compose down -v` only when you also want to remove persistent development data.
 
-```bash
-docker compose down -v
-```
+## Configuration
 
-### Option 2: Use a process manager (recommended for development)
+Backend variables are documented in `backend/.env.example`.
 
-You can use tools like `concurrently` or `npm-run-all` to run both services together. Add this to your root `package.json`:
+| Variable | Default | Purpose |
+| --- | --- | --- |
+| `MONGO_URI` | `mongodb://localhost:27017` | MongoDB connection string |
+| `MONGO_DB_NAME` | `video_journal_db` | Database name |
+| `AUTH_REQUIRED` | `false` | Require a valid Supabase bearer token |
+| `SUPABASE_JWT_SECRET` | unset | JWT secret required when backend auth is enabled |
+| `MEDIA_STORAGE_ROOT` | `backend/video_service/storage` | Persistent uploaded-media directory |
+| `TEMP_UPLOAD_ROOT` | `backend/video_service/temp` | Temporary upload directory |
+| `MAX_UPLOAD_BYTES` | `262144000` | Maximum upload size in bytes |
+| `WHISPER_MODEL_SIZE` | `base` | Faster Whisper model (`tiny`, `base`, `small`, etc.) |
+| `WHISPER_DEVICE` | `cpu` | Whisper execution device |
+| `WHISPER_COMPUTE_TYPE` | `int8` | Whisper compute type |
+| `WHISPER_LANGUAGE` | auto-detect | Optional language hint such as `en` |
+| `OLLAMA_BASE_URL` | `http://localhost:11434` | Ollama server URL |
+| `OLLAMA_SUMMARY_MODEL` | `llama3.2:3b` | Summary model |
+| `OLLAMA_CHAT_MODEL` | `llama3.2:3b` | Chat model |
 
-```json
-{
-  "scripts": {
-    "dev": "concurrently \"npm run dev:backend\" \"npm run dev:frontend\"",
-    "dev:backend": "cd backend && source ../venv/bin/activate && uvicorn backend.video_service.main:app --reload --host 0.0.0.0 --port 8000",
-    "dev:frontend": "cd frontend && npm run dev"
-  }
-}
-```
+Frontend variables are documented in `frontend/.env.example`.
 
-## Project Structure
+| Variable | Purpose |
+| --- | --- |
+| `VITE_API_BASE_URL` | Backend API URL |
+| `VITE_AUTH_BYPASS` | Use the local anonymous user when set to `true` |
+| `VITE_SUPABASE_URL` | Supabase project URL |
+| `VITE_SUPABASE_PUBLISHABLE_KEY` | Supabase publishable key |
 
-```
+For deployed environments, enable both frontend Supabase authentication and `AUTH_REQUIRED=true` on the backend.
+
+## API overview
+
+The API gateway exposes:
+
+- `GET /health` — service health
+- `POST /transcribe-audio` — upload, transcribe, summarize, and save media
+- `POST /upload-journal` — save a journal entry
+- `GET /journals` — list entries, optionally filtered by date and user
+- `GET /journals/{journal_id}` — retrieve one entry
+- `GET /media/{user_id}/{date}/{filename}` — stream stored media
+- `POST /chat` — send a journal-aware chat message
+- `GET /stats/summary` — aggregate journal statistics
+- `GET /stats/daily` — daily activity statistics
+
+## Project structure
+
+```text
 video-journal-tracker/
 ├── backend/
-│   ├── video_service/      # Main FastAPI service
-│   ├── api_gateway/        # API gateway (if used)
-│   ├── chatbot_service/    # Chatbot service (if used)
-│   └── stats_service/      # Stats service (if used)
-├── frontend/               # React + Vite frontend
-└── venv/                   # Python virtual environment
+│   ├── api_gateway/       # Combined FastAPI entry point
+│   ├── chatbot_service/   # Ollama-backed chat
+│   ├── shared/            # Authentication, settings, and repositories
+│   ├── stats_service/     # Journal activity statistics
+│   └── video_service/     # Uploads, transcription, summaries, and media
+├── frontend/              # React/Vite application
+├── scripts/dev.sh         # Local service manager
+├── docker-compose.yml
+├── Makefile
+└── vjt                    # Development command entry point
 ```
+
+## Verification
+
+Run frontend checks:
+
+```bash
+cd frontend
+npm run lint
+npm run build
+```
+
+Run backend checks from the repository root with the virtual environment active:
+
+```bash
+python -m compileall backend -q
+python -m pip check
+```
+
+On macOS, `./vjt test all` runs the frontend, backend, and dependency-audit checks together.
 
 ## Troubleshooting
 
-- **Backend won't start**: Make sure MongoDB is running and the virtual environment is activated
-- **CORS errors**: Check that the frontend URL is in the CORS origins list in `backend/video_service/main.py`
-- **Port already in use**: Change the port using `--port` flag for uvicorn or modify Vite config
-- **Module not found errors**: Make sure you're running uvicorn from the project root or have the Python path configured correctly
+- **MongoDB connection errors:** Confirm MongoDB is running and `MONGO_URI` points to it.
+- **Auth screen fails at startup:** Check `VITE_SUPABASE_URL` and `VITE_SUPABASE_PUBLISHABLE_KEY`, or enable `VITE_AUTH_BYPASS=true` locally.
+- **401 responses:** Ensure frontend and backend auth modes match and `SUPABASE_JWT_SECRET` is correct.
+- **Transcription fails:** Confirm FFmpeg is installed and the selected Whisper model can be downloaded.
+- **Summary or chat fails:** Confirm Ollama is running and the configured model has been pulled.
+- **CORS errors:** Add the frontend origin to `CORS_ORIGINS`.
+- **Import errors:** Start Uvicorn from the repository root so the `backend` package is importable.

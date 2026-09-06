@@ -1,14 +1,20 @@
 # Virtual envs
 .venv/
 venv/
+.runtime-venv/
 .env
 
 # Project env file (if you really want to ignore only this one too)
 backend/video_service/.env
 
 # Generated / runtime folders
+.dev/
+.forge/analysis.json
 backend/video_service/storage/
 backend/video_service/temp/
+
+# Machine-local tool settings
+**/.claude/settings.local.json
 
 # Python bytecode
 __pycache__/

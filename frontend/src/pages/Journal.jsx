@@ -32,6 +32,25 @@ function extractKeywords(text, max = 6) {
     .map(([w]) => w);
 }
 
+function CameraIcon() {
+  return (
+    <svg
+      width="34"
+      height="34"
+      viewBox="0 0 24 24"
+      fill="none"
+      stroke="currentColor"
+      strokeWidth="2"
+      strokeLinecap="round"
+      strokeLinejoin="round"
+      aria-hidden="true"
+    >
+      <path d="M23 7l-7 5 7 5V7z" />
+      <rect x="1" y="5" width="15" height="14" rx="2" ry="2" />
+    </svg>
+  );
+}
+
 export default function Journal() {
   const nav = useNavigate();
   const { date } = useParams(); // /journal/:date
@@ -136,6 +155,10 @@ export default function Journal() {
     fileInputRef.current?.click();
   }
 
+  function goToRecorder() {
+    nav(`/record/${date}`);
+  }
+
   async function onPickFile(e) {
     const file = e.target.files?.[0];
     // reset input so picking the same file again works
@@ -207,11 +230,30 @@ export default function Journal() {
       {/* EMPTY STATE: no entry for this date */}
       {!loading && !hasEntry && (
         <div className="journalEmpty">
-          <button className="createCircle" onClick={openFilePicker} disabled={uploading}>
-            <PlusIcon />
-          </button>
+          <div className="journalEmptyActions">
+            <button
+              className="createCircle"
+              onClick={goToRecorder}
+              disabled={uploading}
+              aria-label="Record a new video"
+              title="Record a new video"
+            >
+              <CameraIcon />
+            </button>
+
+            <button
+              className="createCircle createCircleSecondary"
+              onClick={openFilePicker}
+              disabled={uploading}
+              aria-label="Upload a video or audio file"
+              title="Upload a video or audio file"
+            >
+              <PlusIcon />
+            </button>
+          </div>
+
           <div className="journalEmptyText">
-            {uploading ? "Creating your journal…" : "No journal for this day. Tap + to create."}
+            {uploading ? "Creating your journal..." : "Record a new video or upload one."}
           </div>
         </div>
       )}
@@ -238,9 +280,14 @@ export default function Journal() {
               </div>
             )}
 
-            <button className="smallAction" onClick={openFilePicker} disabled={uploading}>
-              {uploading ? "Processing…" : "Replace / Upload again"}
-            </button>
+            <div className="journalMediaActions">
+              <button className="smallAction" onClick={goToRecorder} disabled={uploading}>
+                Record new video
+              </button>
+              <button className="smallAction" onClick={openFilePicker} disabled={uploading}>
+                {uploading ? "Processing..." : "Upload file"}
+              </button>
+            </div>
           </div>
 
           {/* SUMMARY card */}

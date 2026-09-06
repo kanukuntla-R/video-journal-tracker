@@ -6,3 +6,4 @@ motor
 pydantic
 python-multipart
 faster-whisper
+PyJWT

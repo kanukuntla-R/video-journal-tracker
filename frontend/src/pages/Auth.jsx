@@ -1,14 +1,14 @@
 import React, { useState } from "react";
 import { supabase } from "../services/supabaseClient.js";
 
-export default function Auth() {
+export default function Auth({ initialError = "" }) {
   const [mode, setMode] = useState("signin"); // "signin" or "signup"
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
 
   const [loading, setLoading] = useState(false);
   const [loadingType, setLoadingType] = useState(""); // "email" or "google"
-  const [errorMsg, setErrorMsg] = useState("");
+  const [errorMsg, setErrorMsg] = useState(initialError);
   const [message, setMessage] = useState("");
 
   async function handleEmailPassword(e) {

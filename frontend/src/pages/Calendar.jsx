@@ -40,7 +40,6 @@ export default function Calendar() {
 
   // Fetch real journal dates instead of mock data
   const [markedDates, setMarkedDates] = useState(new Set());
-  const [loadingJournals, setLoadingJournals] = useState(true);
   const [dayJournals, setDayJournals] = useState([]);
   const [dayLoading, setDayLoading] = useState(false);
   const [dayErr, setDayErr] = useState("");
@@ -54,22 +53,23 @@ export default function Calendar() {
     const currentIso = selectedDay.format("YYYY-MM-DD");
     const nextIso = parsed.format("YYYY-MM-DD");
     if (currentIso === nextIso) return;
-    setSelectedDay(parsed);
-    setViewMonth(parsed.startOf("month"));
-  // eslint-disable-next-line react-hooks/exhaustive-deps
+
+    const syncId = window.setTimeout(() => {
+      setSelectedDay(parsed);
+      setViewMonth(parsed.startOf("month"));
+    }, 0);
+    return () => window.clearTimeout(syncId);
   }, [searchParams, selectedDay]);
 
   // Load journals whenever selectedDay changes
   useEffect(() => {
     if (!selectedDay) return;
     loadDayJournals(selectedDay);
-  // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [selectedDay]);
 
   useEffect(() => {
     async function fetchJournalDates() {
       try {
-        setLoadingJournals(true);
         const journals = await getAllJournals("anonymous"); // Replace with actual user_id if you have auth
         // Extract unique dates from journals
         const dates = new Set(journals.map(j => j.date));
@@ -77,8 +77,6 @@ export default function Calendar() {
       } catch (error) {
         console.error("Failed to fetch journals:", error);
         // Keep empty set on error
-      } finally {
-        setLoadingJournals(false);
       }
     }
     fetchJournalDates();
@@ -90,18 +88,19 @@ export default function Calendar() {
     return Array.from({ length: 42 }, (_, i) => start.add(i, "day"));
   }, [viewMonth]);
 
+  const journaledDatesThisMonth = useMemo(
+    () =>
+      Array.from(markedDates)
+        .filter((iso) => dayjs(iso).isSame(viewMonth, "month"))
+        .sort(),
+    [markedDates, viewMonth]
+  );
+
   function changeMonth(delta) {
     setSlideDir(delta > 0 ? "left" : "right");
     setViewMonth((m) => m.add(delta, "month"));
     // Clear the flag after the animation finishes
     setTimeout(() => setSlideDir(null), 220);
-  }
-
-  function goPrevMonth() {
-    changeMonth(-1);
-  }
-  function goNextMonth() {
-    changeMonth(1);
   }
 
   // Swipe detection (simple + beginner-friendly)
@@ -169,59 +168,75 @@ export default function Calendar() {
       </div>
 
       {/* Month title */}
-      <div className="calendarMonthTitle">{viewMonth.format("MMMM")}</div>
-
-      {/* Weekday row */}
-      <div className="weekdayRow">
-        {WEEKDAYS.map((w) => (
-          <div key={w} className="weekdayCell">
-            {w}
+      <div className="calendarBookedCard">
+        <div className="calendarMonthHeader">
+          <div>
+            <div className="calendarMonthTitle">{viewMonth.format("MMMM")}</div>
+            <div className="calendarBookedMeta">
+              {journaledDatesThisMonth.length} journaled {journaledDatesThisMonth.length === 1 ? "date" : "dates"}
+            </div>
           </div>
-        ))}
-      </div>
 
-      {/* Month grid */}
-      <div
-        className="monthGrid"
-        aria-label="Calendar month grid"
-        key={viewMonth.format("YYYY-MM")}
-        data-slide={slideDir || ""}
-      >
-        {cells.map((d) => {
-          const iso = d.format("YYYY-MM-DD");
-          const inMonth = d.month() === viewMonth.month();
-          const isSelected = iso === selectedDay.format("YYYY-MM-DD");
-          const hasJournal = markedDates.has(iso);
+          <div className="calendarBookedLegend">
+            <span className="calendarLegendMark" />
+            Journaled
+          </div>
+        </div>
 
-          const dotColor = DOT_COLORS[hashToColorIndex(iso)];
+        {/* Weekday row */}
+        <div className="weekdayRow">
+          {WEEKDAYS.map((w, idx) => (
+            <div key={`${w}-${idx}`} className="weekdayCell">
+              {w}
+            </div>
+          ))}
+        </div>
 
-          return (
-            <button
-              key={iso}
-              className={[
-                "dayCell",
-                inMonth ? "" : "otherMonth",
-                isSelected ? "selected" : "",
-              ].join(" ")}
-              onClick={() => {
-                setSelectedDay(d);
-                loadDayJournals(d);
-              }}
-            >
-              <div className="dayNumber">{d.date()}</div>
+        {/* Month grid */}
+        <div
+          className="monthGrid"
+          aria-label="Calendar month grid"
+          key={viewMonth.format("YYYY-MM")}
+          data-slide={slideDir || ""}
+        >
+          {cells.map((d) => {
+            const iso = d.format("YYYY-MM-DD");
+            const inMonth = d.month() === viewMonth.month();
+            const isSelected = iso === selectedDay.format("YYYY-MM-DD");
+            const hasJournal = markedDates.has(iso);
 
-              <div className="dayDotRow">
-                {hasJournal && (
-                  <span
-                    className="dayDot"
-                    style={{ background: dotColor }}
-                    aria-label="Journal exists"
-                  />
-                )}
-              </div>
-            </button>
-          );
-        })}
+            const dotColor = DOT_COLORS[hashToColorIndex(iso)];
+
+            return (
+              <button
+                key={iso}
+                className={[
+                  "dayCell",
+                  inMonth ? "" : "otherMonth",
+                  hasJournal ? "booked" : "",
+                  isSelected ? "selected" : "",
+                ].join(" ")}
+                aria-label={`${d.format("MMMM D, YYYY")}${hasJournal ? ", journaled" : ""}`}
+                onClick={() => {
+                  setSelectedDay(d);
+                  loadDayJournals(d);
+                }}
+              >
+                <div className="dayNumber">{d.date()}</div>
+
+                <div className="dayDotRow">
+                  {hasJournal && (
+                    <span
+                      className="dayDot"
+                      style={{ background: dotColor }}
+                      aria-hidden="true"
+                    />
+                  )}
+                </div>
+              </button>
+            );
+          })}
+        </div>
       </div>
 
       {/* Selected day journal list */}

@@ -44,6 +44,215 @@ function trendLabel(nowValue, baselineValue) {
   return "Typical";
 }
 
+function formatChartDate(iso) {
+  return dayjs(iso).format("MMM D");
+}
+
+function buildAreaPath(points, W, H, pad) {
+  if (!points.length) return "";
+  const baseline = H - pad;
+  const line = points
+    .map((p, idx) => `${idx === 0 ? "M" : "L"} ${p.x.toFixed(2)} ${p.y.toFixed(2)}`)
+    .join(" ");
+  const last = points[points.length - 1];
+  const first = points[0];
+  return `${line} L ${last.x.toFixed(2)} ${baseline} L ${first.x.toFixed(2)} ${baseline} Z`;
+}
+
+function buildLinePath(points) {
+  return points
+    .map((p, idx) => `${idx === 0 ? "M" : "L"} ${p.x.toFixed(2)} ${p.y.toFixed(2)}`)
+    .join(" ");
+}
+
+function InteractiveAreaChart({ data = [], onDayClick }) {
+  const [timeRange, setTimeRange] = useState("90d");
+  const [hoverIdx, setHoverIdx] = useState(null);
+  const W = 720;
+  const H = 250;
+  const pad = 26;
+
+  const filteredData = useMemo(() => {
+    const days = timeRange === "7d" ? 7 : timeRange === "30d" ? 30 : 90;
+    return data.slice(Math.max(0, data.length - days));
+  }, [data, timeRange]);
+
+  const maxDuration = Math.max(1, ...filteredData.map((d) => d.durationMin));
+  const maxEntries = Math.max(1, ...filteredData.map((d) => d.entries));
+  const maxV = Math.max(maxDuration, maxEntries * 15, 1);
+  const span = Math.max(1, filteredData.length - 1);
+  const xFor = (idx) => pad + (idx / span) * (W - pad * 2);
+  const yFor = (value) => pad + (1 - value / maxV) * (H - pad * 2);
+
+  const durationPoints = filteredData.map((d, idx) => ({
+    x: xFor(idx),
+    y: yFor(d.durationMin),
+    item: d,
+  }));
+  const entryPoints = filteredData.map((d, idx) => ({
+    x: xFor(idx),
+    y: yFor(d.entries * 15),
+    item: d,
+  }));
+
+  const hover = hoverIdx !== null ? filteredData[hoverIdx] : null;
+  const hoverPoint = hoverIdx !== null ? durationPoints[hoverIdx] : null;
+
+  return (
+    <div className="interactiveChartCard">
+      <div className="interactiveChartHeader">
+        <div>
+          <div className="interactiveChartTitle">Journal Activity</div>
+          <div className="interactiveChartDescription">
+            Duration and entry count over time
+          </div>
+        </div>
+
+        <select
+          className="chartRangeSelect"
+          value={timeRange}
+          aria-label="Select chart range"
+          onChange={(e) => setTimeRange(e.target.value)}
+        >
+          <option value="90d">Last 3 months</option>
+          <option value="30d">Last 30 days</option>
+          <option value="7d">Last 7 days</option>
+        </select>
+      </div>
+
+      <div className="interactiveChartBody">
+        <svg
+          width="100%"
+          height="250"
+          viewBox={`0 0 ${W} ${H}`}
+          role="img"
+          aria-label="Interactive journal activity area chart"
+          preserveAspectRatio="none"
+        >
+          <defs>
+            <linearGradient id="durationAreaFill" x1="0" y1="0" x2="0" y2="1">
+              <stop offset="5%" stopColor="var(--purple)" stopOpacity="0.72" />
+              <stop offset="95%" stopColor="var(--purple)" stopOpacity="0.08" />
+            </linearGradient>
+            <linearGradient id="entriesAreaFill" x1="0" y1="0" x2="0" y2="1">
+              <stop offset="5%" stopColor="var(--cyan)" stopOpacity="0.55" />
+              <stop offset="95%" stopColor="var(--cyan)" stopOpacity="0.05" />
+            </linearGradient>
+          </defs>
+
+          {[0.25, 0.5, 0.75].map((line) => {
+            const y = pad + line * (H - pad * 2);
+            return (
+              <line
+                key={line}
+                x1={pad}
+                x2={W - pad}
+                y1={y}
+                y2={y}
+                stroke="rgba(255,255,255,0.08)"
+                strokeWidth="1"
+                vectorEffect="non-scaling-stroke"
+              />
+            );
+          })}
+
+          {durationPoints.length > 0 && (
+            <>
+              <path d={buildAreaPath(entryPoints, W, H, pad)} fill="url(#entriesAreaFill)" />
+              <path
+                d={buildLinePath(entryPoints)}
+                fill="none"
+                stroke="var(--cyan)"
+                strokeWidth="2"
+                strokeLinecap="round"
+                strokeLinejoin="round"
+                vectorEffect="non-scaling-stroke"
+                opacity="0.95"
+              />
+              <path d={buildAreaPath(durationPoints, W, H, pad)} fill="url(#durationAreaFill)" />
+              <path
+                d={buildLinePath(durationPoints)}
+                fill="none"
+                stroke="var(--purple)"
+                strokeWidth="2.5"
+                strokeLinecap="round"
+                strokeLinejoin="round"
+                vectorEffect="non-scaling-stroke"
+              />
+            </>
+          )}
+
+          {filteredData.map((item, idx) => {
+            const point = durationPoints[idx];
+            const showTick = idx === 0 || idx === filteredData.length - 1 || idx % Math.ceil(filteredData.length / 4) === 0;
+            return (
+              <g key={item.date}>
+                <rect
+                  x={point.x - Math.max(5, (W - pad * 2) / Math.max(1, filteredData.length) / 2)}
+                  y={pad}
+                  width={Math.max(10, (W - pad * 2) / Math.max(1, filteredData.length))}
+                  height={H - pad * 2}
+                  fill="transparent"
+                  style={{ cursor: onDayClick ? "pointer" : "default" }}
+                  onMouseEnter={() => setHoverIdx(idx)}
+                  onMouseLeave={() => setHoverIdx(null)}
+                  onClick={onDayClick ? () => onDayClick(item.date) : undefined}
+                />
+                {showTick && (
+                  <text
+                    x={point.x}
+                    y={H - 4}
+                    textAnchor="middle"
+                    fill="rgba(255,255,255,0.48)"
+                    fontSize="11"
+                    fontWeight="700"
+                  >
+                    {formatChartDate(item.date)}
+                  </text>
+                )}
+              </g>
+            );
+          })}
+
+          {hover && hoverPoint && (
+            <g>
+              <line
+                x1={hoverPoint.x}
+                x2={hoverPoint.x}
+                y1={pad}
+                y2={H - pad}
+                stroke="rgba(255,255,255,0.18)"
+                strokeWidth="1"
+                vectorEffect="non-scaling-stroke"
+              />
+              <circle cx={hoverPoint.x} cy={hoverPoint.y} r="4.5" fill="var(--purple)" />
+            </g>
+          )}
+        </svg>
+
+        {hover && hoverPoint && (
+          <div
+            className="interactiveChartTooltip"
+            style={{
+              left: `${(hoverPoint.x / W) * 100}%`,
+              top: hoverPoint.y,
+            }}
+          >
+            <div>{formatChartDate(hover.date)}</div>
+            <span>{hover.durationMin} min</span>
+            <span>{hover.entries} entries</span>
+          </div>
+        )}
+      </div>
+
+      <div className="chartLegend">
+        <span><i style={{ background: "var(--purple)" }} /> Duration</span>
+        <span><i style={{ background: "var(--cyan)" }} /> Entries</span>
+      </div>
+    </div>
+  );
+}
+
 /** -------- Apple-Health style trend chart (thin bars + avg line) -------- */
 function TrendChart({ values = [], labels = [], accent = "var(--orange)", onBarClick }) {
   // fixed canvas size; svg scales to container
@@ -322,6 +531,15 @@ export default function Stats() {
       dayjs().subtract(20 - i, "day").format("YYYY-MM-DD")
     );
 
+    const chart90 = Array.from({ length: 90 }, (_, i) => {
+      const day = dayjs().subtract(89 - i, "day").format("YYYY-MM-DD");
+      return {
+        date: day,
+        durationMin: Math.round((durationByDay.get(day) || 0) / 60),
+        entries: sessionsByDay.get(day) || 0,
+      };
+    });
+
     // longest streak (all time)
     let longestStreak = 0;
     let current = 0;
@@ -361,7 +579,6 @@ export default function Stats() {
     // monthly sessions: current month vs last month
     const startThisMonth = dayjs().startOf("month");
     const startLastMonth = dayjs().subtract(1, "month").startOf("month");
-    const endLastMonth = startThisMonth.subtract(1, "day").endOf("day");
 
     let thisMonthSessions = 0;
     let lastMonthSessions = 0;
@@ -408,6 +625,7 @@ export default function Stats() {
       longestStreak,
       last21,
       last21Dates,
+      chart90,
       last30,
       last30Dates,
       this7,
@@ -505,6 +723,11 @@ export default function Stats() {
       {!loading && !err && (
         <>
           <div className="sectionHeader">Trends</div>
+
+          <InteractiveAreaChart
+            data={derived.chart90}
+            onDayClick={(d) => handleDayClick(d, "daily")}
+          />
 
           <div className="statsCard">
             <div className="metricRow">
