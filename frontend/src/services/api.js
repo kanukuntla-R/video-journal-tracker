@@ -1,10 +1,31 @@
 // FILE: frontend/src/services/api.js
 
+import { supabase } from "./supabaseClient.js";
+
 export const API_BASE =
   import.meta.env.VITE_API_BASE_URL?.replace(/\/$/, "") || "http://127.0.0.1:8000";
 
+const AUTH_BYPASS = import.meta.env.VITE_AUTH_BYPASS === "true";
+
+async function getAuthHeaders() {
+  if (AUTH_BYPASS) return {};
+
+  const { data } = await supabase.auth.getSession();
+  const token = data?.session?.access_token;
+  return token ? { Authorization: `Bearer ${token}` } : {};
+}
+
 async function request(path, options = {}) {
-  const res = await fetch(`${API_BASE}${path}`, options);
+  const authHeaders = await getAuthHeaders();
+  const headers = {
+    ...authHeaders,
+    ...(options.headers || {}),
+  };
+
+  const res = await fetch(`${API_BASE}${path}`, {
+    ...options,
+    headers,
+  });
 
   // Try to read JSON error bodies (FastAPI often returns JSON on errors)
   const isJson = res.headers.get("content-type")?.includes("application/json");

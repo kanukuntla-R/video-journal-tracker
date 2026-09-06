@@ -25,6 +25,20 @@ def _get_path_env(name: str, default: Path) -> Path:
     return path if path.is_absolute() else PROJECT_ROOT / path
 
 
+def _get_int_env(name: str, default: int) -> int:
+    raw = os.getenv(name)
+    if not raw:
+        return default
+    return int(raw)
+
+
+def _get_bool_env(name: str, default: bool) -> bool:
+    raw = os.getenv(name)
+    if raw is None:
+        return default
+    return raw.strip().lower() in {"1", "true", "yes", "on"}
+
+
 DEFAULT_CORS_ORIGINS = [
     "http://localhost:3000",
     "http://localhost:5173",
@@ -34,6 +48,8 @@ DEFAULT_CORS_ORIGINS = [
 
 APP_NAME = os.getenv("APP_NAME", "Video Journal Tracker")
 CORS_ORIGINS = _get_csv_env("CORS_ORIGINS", DEFAULT_CORS_ORIGINS)
+AUTH_REQUIRED = _get_bool_env("AUTH_REQUIRED", False)
+SUPABASE_JWT_SECRET = os.getenv("SUPABASE_JWT_SECRET")
 
 MONGO_URI = os.getenv("MONGO_URI", "mongodb://localhost:27017")
 MONGO_DB_NAME = os.getenv("MONGO_DB_NAME", "video_journal_db")
@@ -45,6 +61,26 @@ MEDIA_STORAGE_ROOT = _get_path_env(
 TEMP_UPLOAD_ROOT = _get_path_env(
     "TEMP_UPLOAD_ROOT",
     BACKEND_ROOT / "video_service" / "temp",
+)
+MAX_UPLOAD_BYTES = _get_int_env("MAX_UPLOAD_BYTES", 250 * 1024 * 1024)
+ALLOWED_MEDIA_EXTENSIONS = set(
+    _get_csv_env(
+        "ALLOWED_MEDIA_EXTENSIONS",
+        [
+            ".aac",
+            ".avi",
+            ".flac",
+            ".m4a",
+            ".m4v",
+            ".mkv",
+            ".mov",
+            ".mp3",
+            ".mp4",
+            ".ogg",
+            ".wav",
+            ".webm",
+        ],
+    )
 )
 
 WHISPER_MODEL_SIZE = os.getenv("WHISPER_MODEL_SIZE", "base")

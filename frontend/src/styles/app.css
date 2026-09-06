@@ -274,10 +274,56 @@
   }
   
   .calendarMonthTitle {
-    margin-top: 16px;
     font-size: 34px;
     font-weight: 900;
-    letter-spacing: -0.02em;
+    letter-spacing: 0;
+    line-height: 1.02;
+  }
+
+  .calendarBookedCard {
+    margin-top: 16px;
+    padding: 14px;
+    border-radius: 8px;
+    background: rgba(20, 20, 23, 0.94);
+    border: 1px solid rgba(255,255,255,0.08);
+    box-shadow: 0 16px 42px rgba(0,0,0,0.28);
+  }
+
+  .calendarMonthHeader {
+    display: flex;
+    align-items: flex-start;
+    justify-content: space-between;
+    gap: 12px;
+  }
+
+  .calendarBookedMeta {
+    margin-top: 5px;
+    color: var(--muted);
+    font-size: 12px;
+    font-weight: 700;
+  }
+
+  .calendarBookedLegend {
+    min-height: 32px;
+    padding: 0 10px;
+    border-radius: 999px;
+    background: rgba(34, 211, 238, 0.11);
+    border: 1px solid rgba(34, 211, 238, 0.18);
+    color: rgba(255,255,255,0.88);
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    font-size: 12px;
+    font-weight: 800;
+    white-space: nowrap;
+  }
+
+  .calendarLegendMark {
+    width: 14px;
+    height: 2px;
+    border-radius: 999px;
+    background: var(--cyan);
+    display: inline-block;
   }
   
   .weekdayRow {
@@ -313,6 +359,15 @@
     align-items: center;
     justify-items: center;
     cursor: pointer;
+    transition: background 140ms ease, color 140ms ease, transform 140ms ease;
+  }
+
+  .dayCell:hover {
+    background: rgba(255,255,255,0.055);
+  }
+
+  .dayCell:active {
+    transform: scale(0.98);
   }
   
   .dayCell.otherMonth {
@@ -332,6 +387,22 @@
   .dayCell.selected .dayNumber {
     background: #ff3b30; /* iOS-ish red */
     color: white;
+    text-decoration: none;
+  }
+
+  .dayCell.booked .dayNumber {
+    color: rgba(255,255,255,0.96);
+    text-decoration: line-through;
+    text-decoration-thickness: 2px;
+    text-decoration-color: var(--cyan);
+    text-underline-offset: 3px;
+    background: rgba(34, 211, 238, 0.10);
+  }
+
+  .dayCell.booked.selected .dayNumber {
+    background: var(--cyan);
+    color: #031316;
+    text-decoration-color: rgba(3, 19, 22, 0.75);
   }
   
   .dayDotRow {
@@ -346,6 +417,35 @@
     border-radius: 999px;
     opacity: 0.9;
   }
+
+@media (max-width: 520px) {
+  .calendarBookedCard {
+    padding: 12px 10px;
+  }
+
+  .calendarMonthHeader {
+    align-items: flex-start;
+  }
+
+  .calendarMonthTitle {
+    font-size: 30px;
+  }
+
+  .calendarBookedLegend {
+    padding: 0 9px;
+  }
+
+  .dayCell {
+    height: 50px;
+    border-radius: 10px;
+  }
+
+  .dayNumber {
+    width: 32px;
+    height: 32px;
+    font-size: 14px;
+  }
+}
   
   /* ===== Journal Page ===== */
 
@@ -382,6 +482,13 @@
   gap: 14px;
 }
 
+.journalEmptyActions{
+  display:flex;
+  gap: 14px;
+  align-items:center;
+  justify-content:center;
+}
+
 .createCircle{
   width: 88px;
   height: 88px;
@@ -395,6 +502,11 @@
 }
 .createCircle:active{ transform: scale(0.985); opacity: 0.92; }
 .createCircle:disabled{ opacity: 0.6; cursor: not-allowed; }
+
+.createCircleSecondary{
+  background: rgba(255,255,255,0.06);
+  border: 1px solid rgba(255,255,255,0.1);
+}
 
 .journalEmptyText{
   color: var(--muted);
@@ -498,6 +610,171 @@ audio.mediaPlayer {
   color: var(--text);
   padding: 12px 14px;
   font-weight: 700;
+}
+
+.journalMediaActions{
+  display:grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 10px;
+}
+
+/* ===== Recorder Page ===== */
+
+.recorderPage{
+  padding-top: 16px;
+}
+
+.recorderStage{
+  position: relative;
+  margin-top: 14px;
+  background: #0b0b0e;
+  border-radius: 22px;
+  aspect-ratio: 9 / 16;
+  max-height: 60vh;
+  overflow: hidden;
+}
+
+@media (min-width: 720px){
+  .recorderStage{
+    aspect-ratio: 16 / 9;
+    max-height: 56vh;
+  }
+}
+
+.recorderVideo{
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  display: block;
+  background: #000;
+}
+
+.recorderMirror{
+  transform: scaleX(-1);
+}
+
+.recorderBadge{
+  position: absolute;
+  top: 12px;
+  left: 12px;
+  background: rgba(0,0,0,0.55);
+  backdrop-filter: blur(8px);
+  -webkit-backdrop-filter: blur(8px);
+  color: white;
+  font-weight: 800;
+  font-size: 12px;
+  letter-spacing: 0.06em;
+  padding: 6px 10px;
+  border-radius: 999px;
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.recorderDot{
+  width: 8px;
+  height: 8px;
+  border-radius: 999px;
+  background: #ef4444;
+  animation: recBlink 1s infinite ease-in-out;
+}
+
+@keyframes recBlink{
+  0%, 100% { opacity: 1; }
+  50% { opacity: 0.3; }
+}
+
+.recorderOverlay{
+  position: absolute;
+  inset: 0;
+  display: grid;
+  place-items: center;
+  text-align: center;
+  padding: 24px;
+  color: var(--muted);
+  font-weight: 600;
+  background: rgba(0,0,0,0.35);
+}
+
+.recorderStatusLine{
+  margin: 14px 4px 4px;
+  color: var(--muted);
+  font-size: 13px;
+  text-align: center;
+}
+
+.recorderControls{
+  margin-top: 18px;
+  display:flex;
+  justify-content:center;
+  align-items:center;
+  gap: 14px;
+}
+
+.recorderRecordBtn{
+  width: 78px;
+  height: 78px;
+  border-radius: 999px;
+  background: rgba(255,255,255,0.06);
+  border: 4px solid rgba(255,255,255,0.85);
+  display:grid;
+  place-items:center;
+  cursor:pointer;
+  transition: transform 140ms ease;
+}
+
+.recorderRecordBtn:active{
+  transform: scale(0.96);
+}
+
+.recorderRecordCircle{
+  width: 54px;
+  height: 54px;
+  border-radius: 999px;
+  background: #ef4444;
+  display:block;
+}
+
+.recorderStopSquare{
+  width: 28px;
+  height: 28px;
+  border-radius: 6px;
+  background: #ef4444;
+  display:block;
+}
+
+.recorderReviewRow{
+  width: 100%;
+  display:grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 10px;
+}
+
+.recorderSecondaryBtn,
+.recorderPrimaryBtn{
+  border-radius: 16px;
+  padding: 14px 16px;
+  font-weight: 700;
+  font-size: 14px;
+  cursor:pointer;
+  border: 1px solid rgba(255,255,255,0.08);
+}
+
+.recorderSecondaryBtn{
+  background: rgba(23,23,28,0.7);
+  color: var(--text);
+}
+
+.recorderPrimaryBtn{
+  background: var(--blue);
+  border-color: var(--blue);
+  color: white;
+}
+
+.recorderSecondaryBtn:disabled,
+.recorderPrimaryBtn:disabled{
+  opacity: 0.6;
+  cursor: not-allowed;
 }
 
 /* ===== Stats Page ===== */
@@ -608,6 +885,113 @@ audio.mediaPlayer {
   color: white;
 }
 
+.interactiveChartCard{
+  margin: 12px 0;
+  overflow: hidden;
+  border-radius: 8px;
+  background: rgba(20, 20, 23, 0.94);
+  border: 1px solid rgba(255,255,255,0.08);
+  box-shadow: 0 16px 42px rgba(0,0,0,0.28);
+}
+
+.interactiveChartHeader{
+  min-height: 76px;
+  padding: 16px;
+  border-bottom: 1px solid rgba(255,255,255,0.08);
+  display:flex;
+  align-items:center;
+  justify-content:space-between;
+  gap: 14px;
+}
+
+.interactiveChartTitle{
+  font-size: 16px;
+  font-weight: 900;
+  line-height: 1.2;
+}
+
+.interactiveChartDescription{
+  margin-top: 4px;
+  color: var(--muted);
+  font-size: 12px;
+  font-weight: 650;
+}
+
+.chartRangeSelect{
+  width: 154px;
+  min-height: 38px;
+  border-radius: 8px;
+  border: 1px solid rgba(255,255,255,0.10);
+  background: rgba(255,255,255,0.055);
+  color: var(--text);
+  font: inherit;
+  font-size: 13px;
+  font-weight: 800;
+  padding: 0 10px;
+  outline: none;
+}
+
+.chartRangeSelect:focus{
+  border-color: rgba(34,211,238,0.44);
+  box-shadow: 0 0 0 3px rgba(34,211,238,0.12);
+}
+
+.interactiveChartBody{
+  position: relative;
+  padding: 12px 8px 4px;
+}
+
+.interactiveChartBody svg{
+  display:block;
+}
+
+.interactiveChartTooltip{
+  position: absolute;
+  z-index: 5;
+  transform: translate(-50%, -104%);
+  min-width: 118px;
+  pointer-events:none;
+  border-radius: 8px;
+  background: rgba(8,8,10,0.92);
+  border: 1px solid rgba(255,255,255,0.12);
+  box-shadow: 0 14px 35px rgba(0,0,0,0.38);
+  padding: 8px 10px;
+  color: white;
+  font-size: 12px;
+  font-weight: 800;
+  display:grid;
+  gap: 4px;
+}
+
+.interactiveChartTooltip span{
+  color: var(--muted);
+  font-weight: 700;
+}
+
+.chartLegend{
+  padding: 0 16px 14px;
+  display:flex;
+  align-items:center;
+  justify-content:center;
+  gap: 16px;
+  color: var(--muted);
+  font-size: 12px;
+  font-weight: 800;
+}
+
+.chartLegend span{
+  display:inline-flex;
+  align-items:center;
+  gap: 7px;
+}
+
+.chartLegend i{
+  width: 9px;
+  height: 9px;
+  border-radius: 999px;
+  display:inline-block;
+}
+
 .chartWrap{
   border-top: 1px solid rgba(255,255,255,0.06);
   padding-top: 12px;
@@ -620,59 +1004,87 @@ audio.mediaPlayer {
   font-weight: 800;
 }
 
+@media (max-width: 520px) {
+  .interactiveChartHeader{
+    align-items:flex-start;
+    flex-direction:column;
+  }
+
+  .chartRangeSelect{
+    width: 100%;
+  }
+
+  .interactiveChartBody{
+    padding-left: 2px;
+    padding-right: 2px;
+  }
+}
+
 
 
 /* ===== Chatbot Page ===== */
 
 .chatPage {
-  padding-top: 10px;
-  /* extra room because we have BOTH: composer + floating tab bar */
-  padding-bottom: 220px;
+  min-height: 100vh;
+  padding-top: 14px;
+  padding-bottom: 108px;
+  display: flex;
 }
 
-/* Top bar */
-.chatTopBar {
-  position: sticky;
-  top: 0;
-  z-index: 5;
-  background: var(--bg);
+.chatShell {
+  width: min(100%, 760px);
+  height: calc(100vh - 140px);
+  min-height: 540px;
+  margin: 0 auto;
   display: grid;
-  grid-template-columns: 56px 1fr 120px;
+  grid-template-rows: auto 1fr auto;
+  overflow: hidden;
+  border-radius: 8px;
+  background: rgba(20, 20, 23, 0.94);
+  border: 1px solid rgba(255,255,255,0.08);
+  box-shadow: 0 18px 55px rgba(0,0,0,0.42);
+}
+
+.chatCardHeader {
+  display: grid;
+  grid-template-columns: 42px 1fr 42px;
+  align-items: center;
+  gap: 12px;
+  padding: 14px;
+  border-bottom: 1px solid rgba(255,255,255,0.08);
+}
+
+.chatHeaderTitle {
+  min-width: 0;
+  display: flex;
   align-items: center;
   gap: 10px;
-  padding: 8px 0 6px;
 }
 
-.chatTopBtn {
-  width: 44px;
-  height: 44px;
-  border-radius: 999px;
-  border: 1px solid rgba(255,255,255,0.06);
-  background: rgba(23,23,28,0.55);
-  color: var(--text);
-  display: grid;
-  place-items: center;
-  padding: 0;
-}
-
-.chatTopRight {
-  display: flex;
-  justify-content: flex-end;
-  gap: 8px;
-}
-
-.chatTitleWrap {
-  display: grid;
-  place-items: center;
-}
-
-.chatTitle {
-  display: inline-flex;
-  align-items: center;
-  gap: 8px;
-  font-weight: 800;
+.chatHeaderTitle h1 {
+  margin: 0;
   font-size: 16px;
-  letter-spacing: 0.01em;
+  line-height: 1.2;
+  font-weight: 800;
+  letter-spacing: 0;
+}
+
+.chatHeaderTitle p {
+  margin: 2px 0 0;
+  color: var(--muted);
+  font-size: 12px;
+  line-height: 1.25;
+}
+
+.chatTitleIcon {
+  width: 32px;
+  height: 32px;
+  flex: 0 0 auto;
+  display: grid;
+  place-items: center;
+  border-radius: 8px;
+  background: rgba(34, 211, 238, 0.12);
+  color: var(--cyan);
 }
 
 .chatTitleIcon svg {
@@ -681,18 +1093,93 @@ audio.mediaPlayer {
   display: block;
 }
 
-.chatTitleChevron {
-  opacity: 0.6;
-  font-weight: 900;
-  margin-left: 4px;
+.chatIconButton,
+.chatMiniButton,
+.chatSendButton,
+.chatActionBtn {
+  border: 1px solid rgba(255,255,255,0.10);
+  background: rgba(255,255,255,0.055);
+  color: rgba(255,255,255,0.92);
+  display: grid;
+  place-items: center;
+  padding: 0;
+  cursor: pointer;
 }
 
-/* Conversation */
+.chatIconButton {
+  width: 42px;
+  height: 42px;
+  border-radius: 8px;
+}
+
+.chatIconButton:disabled,
+.chatSendButton:disabled {
+  opacity: 0.45;
+  cursor: not-allowed;
+}
+
+.chatCardBody {
+  min-height: 0;
+  overflow: hidden;
+}
+
+.chatEmpty {
+  height: 100%;
+  display: grid;
+  place-content: center;
+  justify-items: center;
+  gap: 10px;
+  padding: 28px;
+  text-align: center;
+}
+
+.chatEmptyIcon {
+  width: 48px;
+  height: 48px;
+  border-radius: 8px;
+  display: grid;
+  place-items: center;
+  background: rgba(255,255,255,0.07);
+  color: var(--cyan);
+}
+
+.chatEmpty h2 {
+  margin: 2px 0 0;
+  font-size: 18px;
+  line-height: 1.2;
+}
+
+.chatEmpty p {
+  max-width: 320px;
+  margin: 0;
+  color: var(--muted);
+  font-size: 13px;
+  line-height: 1.5;
+}
+
+.chatMessageScroller {
+  position: relative;
+  height: 100%;
+  min-height: 0;
+}
+
 .chatScroller {
-  margin-top: 8px;
+  height: 100%;
+  overflow-y: auto;
   display: flex;
   flex-direction: column;
   gap: 16px;
+  padding: 18px 16px 22px;
+  scroll-behavior: smooth;
+}
+
+.chatScroller::-webkit-scrollbar {
+  width: 8px;
+}
+
+.chatScroller::-webkit-scrollbar-thumb {
+  background: rgba(255,255,255,0.12);
+  border-radius: 999px;
 }
 
 .chatMsgRow {
@@ -707,151 +1194,211 @@ audio.mediaPlayer {
   width: 100%;
   display: flex;
   justify-content: flex-end;
-  margin-bottom: 6px;
+  margin-bottom: 8px;
 }
 
 .chatTopicChip {
-  padding: 8px 12px;
+  padding: 7px 11px;
   border-radius: 999px;
-  background: rgba(255,255,255,0.08);
-  border: 1px solid rgba(255,255,255,0.06);
-  color: white;
+  background: rgba(34, 211, 238, 0.13);
+  border: 1px solid rgba(34, 211, 238, 0.20);
+  color: rgba(255,255,255,0.95);
   font-weight: 800;
   font-size: 12px;
 }
 
 .chatMsg {
-  max-width: 92%;
+  max-width: min(88%, 560px);
 }
 
 .chatMsgText {
   white-space: pre-wrap;
-  line-height: 1.65;
+  line-height: 1.62;
   font-size: 14px;
-  color: rgba(255,255,255,0.95);
+  color: rgba(255,255,255,0.94);
 }
 
-/* User message: subtle bubble (spec said optional) */
 .chatMsg.user .chatMsgText {
-  background: rgba(23,23,28,0.72);
-  border: 1px solid rgba(255,255,255,0.06);
-  border-radius: 16px;
+  background: rgba(34, 211, 238, 0.13);
+  border: 1px solid rgba(34, 211, 238, 0.18);
+  border-radius: 8px;
   padding: 10px 12px;
-  color: rgba(255,255,255,0.88);
 }
 
-/* Assistant message: no bubble */
 .chatMsg.assistant .chatMsgText {
   padding: 0;
 }
 
-/* Action row under assistant messages */
+.chatMsg.thinking .chatMsgText {
+  color: var(--muted);
+}
+
 .chatActionRow {
   margin-top: 8px;
   display: flex;
-  gap: 10px;
+  gap: 8px;
   align-items: center;
 }
 
 .chatActionBtn {
-  width: 34px;
-  height: 34px;
-  border-radius: 999px;
-  border: 1px solid rgba(255,255,255,0.06);
-  background: rgba(23,23,28,0.50);
-  color: rgba(255,255,255,0.85);
-  padding: 0;
-  display: grid;
-  place-items: center;
+  width: 32px;
+  height: 32px;
+  border-radius: 8px;
 }
 
-/* Input bar (fixed, like iOS) */
-.chatComposer {
-  position: fixed;
-  left: 16px;
-  right: 16px;
-
-  /* keep above the floating TabBar */
-  bottom: calc(18px + 68px + 14px + env(safe-area-inset-bottom));
-
-  display: grid;
-  grid-template-columns: 48px 1fr 48px;
-  gap: 10px;
-  align-items: center;
-  z-index: 10;
-}
-
-.chatCircleBtn,
-.chatVoiceBtn,
-.chatSendBtn {
-  width: 48px;
-  height: 48px;
-  border-radius: 999px;
-  border: 1px solid rgba(255,255,255,0.06);
-  background: rgba(23,23,28,0.65);
+.chatJumpButton {
+  position: absolute;
+  left: 50%;
+  bottom: 12px;
+  transform: translateX(-50%);
+  border: 1px solid rgba(255,255,255,0.10);
+  background: rgba(20,20,23,0.92);
   color: white;
-  display: grid;
-  place-items: center;
-  padding: 0;
-}
-
-.chatSendBtn {
-  background: rgba(23,23,28,0.8);
-  border-color: rgba(255,255,255,0.10);
-  color: white;
-}
-
-.chatInputPill {
-  height: 48px;
   border-radius: 999px;
-  background: rgba(23,23,28,0.72);
-  border: 1px solid rgba(255,255,255,0.06);
-  display: flex;
+  min-height: 36px;
+  padding: 0 12px;
+  display: inline-flex;
   align-items: center;
-  padding: 10px 14px;
+  gap: 8px;
+  font-weight: 800;
+  font-size: 12px;
+  box-shadow: 0 12px 30px rgba(0,0,0,0.35);
+}
+
+.chatJumpButton .chatSvg {
+  transform: rotate(180deg);
+}
+
+.chatCardFooter {
+  padding: 12px;
+  border-top: 1px solid rgba(255,255,255,0.08);
+}
+
+.chatInputGroup {
+  position: relative;
+  min-height: 86px;
+  border-radius: 8px;
+  border: 1px solid rgba(255,255,255,0.10);
+  background: rgba(255,255,255,0.045);
+  display: grid;
+  grid-template-rows: 1fr auto;
+  overflow: visible;
 }
 
 .chatInput {
   width: 100%;
-  border: none;
+  min-height: 48px;
+  max-height: 120px;
+  padding: 12px 12px 6px;
+  border: 0;
   outline: none;
   background: transparent;
   color: white;
   resize: none;
+  font: inherit;
   font-size: 14px;
-  line-height: 1.35;
-  max-height: 120px;
+  line-height: 1.45;
 }
 
 .chatInput::placeholder {
-  color: rgba(255,255,255,0.45);
+  color: rgba(255,255,255,0.42);
 }
 
-.chatIcon {
-  font-size: 16px;
-  font-weight: 900;
-  line-height: 1;
-  display: inline-flex;
+.chatInputActions {
+  min-height: 36px;
+  padding: 0 8px 8px;
+  display: flex;
   align-items: center;
-  justify-content: center;
+  gap: 8px;
 }
 
-/* Ensure custom fml-icon inherits text color and sizing */
-.chatIcon fml-icon {
-  display: inline-flex;
-  width: 18px;
-  height: 18px;
-  color: inherit;
+.chatToolsWrap {
+  position: relative;
 }
 
-/* Inline SVG inside chat icons (send icon) */
-.chatIcon svg {
+.chatMiniButton,
+.chatSendButton {
+  width: 32px;
+  height: 32px;
+  border-radius: 8px;
+}
+
+.chatSendButton {
+  margin-left: auto;
+  background: var(--cyan);
+  border-color: transparent;
+  color: #031316;
+}
+
+.chatToolsMenu {
+  position: absolute;
+  left: 0;
+  bottom: 40px;
+  z-index: 20;
+  width: 206px;
+  padding: 6px;
+  border-radius: 8px;
+  background: rgba(24,24,28,0.98);
+  border: 1px solid rgba(255,255,255,0.10);
+  box-shadow: 0 18px 50px rgba(0,0,0,0.45);
+}
+
+.chatToolsMenu button {
+  width: 100%;
+  min-height: 36px;
+  border: 0;
+  border-radius: 6px;
+  background: transparent;
+  color: rgba(255,255,255,0.9);
+  display: flex;
+  align-items: center;
+  gap: 9px;
+  padding: 0 9px;
+  font: inherit;
+  font-size: 13px;
+  text-align: left;
+  cursor: pointer;
+}
+
+.chatToolsMenu button:hover {
+  background: rgba(255,255,255,0.08);
+}
+
+.chatSvg {
   width: 18px;
   height: 18px;
   display: block;
+  flex: 0 0 auto;
   fill: none;
   stroke: currentColor;
   stroke-width: 2;
   stroke-linecap: round;
   stroke-linejoin: round;
+}
+
+@media (max-width: 520px) {
+  .chatPage {
+    padding-left: 10px;
+    padding-right: 10px;
+  }
+
+  .chatShell {
+    height: calc(100vh - 126px);
+    min-height: 0;
+  }
+
+  .chatCardHeader {
+    grid-template-columns: 38px 1fr 38px;
+    gap: 8px;
+    padding: 10px;
+  }
+
+  .chatIconButton {
+    width: 38px;
+    height: 38px;
+  }
+
+  .chatMsg {
+    max-width: 92%;
+  }
 }
